@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPA: Präsentation als Single Page App</title>
+    <style>
+      :root {
+        --bg: #f3efe9;
+        --bg-deep: #d8cfc3;
+        --ink: #1c1a18;
+        --accent: #f24b29;
+        --accent-2: #1b9aaa;
+        --accent-3: #f2c14e;
+        --shadow: rgba(28, 26, 24, 0.18);
+        --glass: rgba(255, 255, 255, 0.65);
+        --slide-radius: 28px;
+        --mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono",
+          monospace;
+        --display: "Fraunces", "Times New Roman", serif;
+        --ui: "Space Grotesk", "Trebuchet MS", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--ui);
+        color: var(--ink);
+        background: radial-gradient(
+            circle at 15% 10%,
+            rgba(242, 193, 78, 0.45),
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 85% 20%,
+            rgba(27, 154, 170, 0.35),
+            transparent 40%
+          ),
+          linear-gradient(135deg, var(--bg), var(--bg-deep));
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      main {
+        position: relative;
+        height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 48px 0 48px;
+        font-size: 0.95rem;
+      }
+
+      .brand {
+        font-family: var(--display);
+        font-size: 1.4rem;
+        letter-spacing: 0.04em;
+      }
+
+      .hint {
+        font-family: var(--mono);
+        color: rgba(28, 26, 24, 0.55);
+      }
+
+      .deck {
+        position: relative;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 28px 48px;
+      }
+
+      .slides {
+        width: min(1100px, 92vw);
+        height: min(640px, 72vh);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        background: var(--glass);
+        border-radius: var(--slide-radius);
+        box-shadow: 0 28px 80px -40px var(--shadow);
+        backdrop-filter: blur(16px);
+        padding: 48px 56px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 32px;
+        opacity: 0;
+        transform: translateX(6%) scale(0.98);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+
+      .slide.active {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        z-index: 2;
+      }
+
+      .slide.outgoing {
+        opacity: 0;
+        transform: translateX(-6%) scale(0.98);
+        z-index: 1;
+      }
+
+      .slide.full {
+        grid-template-columns: 1fr;
+      }
+
+      .slide h1 {
+        font-family: var(--display);
+        font-size: clamp(2.5rem, 4vw, 3.8rem);
+        margin: 0 0 12px 0;
+      }
+
+      .slide h2 {
+        font-family: var(--display);
+        font-size: clamp(2rem, 3.2vw, 3rem);
+        margin: 0 0 12px 0;
+      }
+
+      .slide h3 {
+        font-size: 1rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin: 0 0 16px 0;
+        color: rgba(28, 26, 24, 0.6);
+      }
+
+      .slide p {
+        font-size: 1.08rem;
+        line-height: 1.6;
+      }
+
+      .slide ul {
+        padding-left: 18px;
+        margin: 16px 0 0 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .slide li {
+        line-height: 1.5;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .tag {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(28, 26, 24, 0.08);
+      }
+
+      .stat {
+        display: grid;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 18px;
+        padding: 18px 20px;
+        box-shadow: 0 18px 40px -28px var(--shadow);
+      }
+
+      .stat span {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        color: rgba(28, 26, 24, 0.65);
+      }
+
+      .stat strong {
+        font-size: 1.4rem;
+      }
+
+      .visual {
+        display: grid;
+        gap: 16px;
+        align-content: center;
+      }
+
+      .svg-frame {
+        background: #fff;
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow: 0 20px 60px -36px var(--shadow);
+      }
+
+      .legend {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        color: rgba(28, 26, 24, 0.6);
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 48px 24px 48px;
+        font-family: var(--mono);
+        font-size: 0.85rem;
+      }
+
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(28, 26, 24, 0.1);
+        overflow: hidden;
+        width: 220px;
+      }
+
+      .progress > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      .dots {
+        display: flex;
+        gap: 8px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(28, 26, 24, 0.25);
+        border: none;
+        cursor: pointer;
+      }
+
+      .dot.active {
+        background: var(--accent);
+      }
+
+      .nav {
+        display: flex;
+        gap: 10px;
+      }
+
+      .nav button {
+        border: none;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-family: var(--mono);
+        background: rgba(28, 26, 24, 0.08);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .nav button:hover {
+        transform: translateY(-2px);
+      }
+
+      .agenda {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 18px;
+        margin-top: 12px;
+      }
+
+      .agenda div {
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 900px) {
+        header,
+        footer,
+        .deck {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        .slides {
+          height: min(720px, 74vh);
+        }
+
+        .slide {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+
+        .slide {
+          padding: 32px 28px;
+        }
+
+        .agenda {
+          grid-template-columns: 1fr;
+        }
+
+        footer {
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand">Single Page Apps</div>
+        <div class="hint">←/→ wechseln · Leertaste · 1–9 direkt</div>
+      </header>
+
+      <section class="deck">
+        <div class="slides" id="slides">
+          <article class="slide active full">
+            <div>
+              <h3>Präsentation als SPA</h3>
+              <h1>Single Page Applications</h1>
+              <p>
+                Eine SPA ist eine Web-App, die einmal lädt und anschließend wie
+                eine native Anwendung reagiert. Diese Präsentation ist selbst
+                eine SPA: Navigation, Animationen und Inhalte laufen in einem
+                einzigen Dokument.
+              </p>
+              <div class="tag-row">
+                <div class="tag">Dauer 10–15 Minuten</div>
+                <div class="tag">Interaktiv</div>
+                <div class="tag">Ohne Seitenreload</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Agenda</h3>
+              <h2>Was erwartet euch?</h2>
+              <div class="agenda">
+                <div>Historie & Meilensteine</div>
+                <div>Funktionsweise</div>
+                <div>Eingabe & Ausgabe</div>
+                <div>Anbieter & Ökosysteme</div>
+                <div>Anwendungsbereiche</div>
+                <div>Entwicklungswerkzeuge</div>
+                <div>Programmiersprachen</div>
+                <div>Vorteile & Nachteile</div>
+                <div>Trends & Best Practices</div>
+                <div>Q&A</div>
+              </div>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>Interaktionsmodell</span>
+                <strong>State getrieben</strong>
+              </div>
+              <div class="stat">
+                <span>Rendering</span>
+                <strong>Client + API</strong>
+              </div>
+              <div class="stat">
+                <span>Navigation</span>
+                <strong>Routing ohne Reload</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Historie</h3>
+              <h2>Vom Dokument zur App</h2>
+              <ul>
+                <li>
+                  2004–2005: Gmail & Google Maps zeigen, dass Web-Apps ohne
+                  Seitenreload möglich sind.
+                </li>
+                <li>
+                  AJAX bringt asynchrones Nachladen; später folgen Fetch, Web
+                  Storage und Service Worker.
+                </li>
+                <li>
+                  2010+: Frameworks wie AngularJS, React und Vue strukturieren
+                  Komponenten und State-Management.
+                </li>
+                <li>
+                  Heute: SPAs sind Standard für Dashboards, SaaS und komplexe
+                  Workflows.
+                </li>
+              </ul>
+            </div>
+            <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Zeitachse zur SPA-Entwicklung"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <path
+                    d="M30 150 L120 90 L210 120 L290 60"
+                    fill="none"
+                    stroke="#1b9aaa"
+                    stroke-width="6"
+                  />
+                  <circle cx="30" cy="150" r="10" fill="#f24b29" />
+                  <circle cx="120" cy="90" r="10" fill="#f24b29" />
+                  <circle cx="210" cy="120" r="10" fill="#f24b29" />
+                  <circle cx="290" cy="60" r="10" fill="#f24b29" />
+                  <text x="18" y="180" font-size="12" font-family="sans-serif">
+                    2004
+                  </text>
+                  <text x="102" y="70" font-size="12" font-family="sans-serif">
+                    2010
+                  </text>
+                  <text x="188" y="150" font-size="12" font-family="sans-serif">
+                    2015
+                  </text>
+                  <text x="268" y="40" font-size="12" font-family="sans-serif">
+                    2024
+                  </text>
+                </svg>
+              </div>
+              <div class="legend">
+                Von HTML-Dokumenten hin zu komplexen SPA-Ökosystemen.
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Funktionsweise</h3>
+              <h2>Einmal laden, dann reagieren</h2>
+              <ul>
+                <li>
+                  Der Browser lädt eine initiale HTML-Shell, CSS und JavaScript.
+                </li>
+                <li>
+                  Ein Router wechselt Views lokal, ohne neue Dokumente zu laden.
+                </li>
+                <li>
+                  Daten fließen per API (REST, GraphQL), der UI-State steuert die
+                  Darstellung.
+                </li>
+                <li>
+                  Komponenten werden deklarativ gerendert und wiederverwendet.
+                </li>
+              </ul>
+              <div class="tag-row">
+                <div class="tag">Client Rendering</div>
+                <div class="tag">State Store</div>
+                <div class="tag">API Gateway</div>
+              </div>
+            </div>
+            <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Diagramm mit Browser, Router und API"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="30" y="40" width="120" height="70" rx="12" fill="#f2c14e" />
+                  <text x="52" y="82" font-size="12" font-family="sans-serif">
+                    Browser
+                  </text>
+                  <rect x="30" y="130" width="120" height="60" rx="12" fill="#1b9aaa" />
+                  <text x="60" y="165" font-size="12" font-family="sans-serif" fill="#fff">
+                    Router
+                  </text>
+                  <rect x="200" y="80" width="90" height="70" rx="12" fill="#f24b29" />
+                  <text x="222" y="122" font-size="12" font-family="sans-serif" fill="#fff">
+                    API
+                  </text>
+                  <path
+                    d="M150 75 L200 115"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow)"
+                    fill="none"
+                  />
+                  <path
+                    d="M150 150 L200 115"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow)"
+                    fill="none"
+                  />
+                  <defs>
+                    <marker
+                      id="arrow"
+                      markerWidth="10"
+                      markerHeight="10"
+                      refX="6"
+                      refY="3"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
+              <div class="legend">UI reagiert auf State, nicht auf Seitenreload.</div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Eingabe & Ausgabe</h3>
+              <h2>Interaktion in Echtzeit</h2>
+              <ul>
+                <li>
+                  Eingaben: Formulare, Drag & Drop, Touch, Tastaturkürzel,
+                  Sprachinput.
+                </li>
+                <li>
+                  Ausgabe: dynamische Komponenten, Live-Validierung, Charts,
+                  Toasts, Echtzeit-Updates.
+                </li>
+                <li>
+                  Offline-First möglich durch Service Worker und lokale Caches.
+                </li>
+                <li>
+                  Barrierefreiheit erfordert Fokus-Management und ARIA-Labels.
+                </li>
+              </ul>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>Reaktionszeit</span>
+                <strong>~16 ms pro Frame</strong>
+              </div>
+              <div class="stat">
+                <span>Input-Kanäle</span>
+                <strong>Touch · Maus · Voice</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Anbieter</h3>
+              <h2>Frameworks & Plattformen</h2>
+              <ul>
+                <li>React, Vue, Angular: dominieren Corporate SPAs.</li>
+                <li>
+                  Svelte, Solid, Qwik: Fokus auf Performance und kleinere
+                  Bundles.
+                </li>
+                <li>
+                  Plattformen: Vercel, Netlify, Firebase für Hosting, CI/CD und
+                  Auth.
+                </li>
+                <li>
+                  Headless APIs: Contentful, Sanity, Strapi für Inhalte.
+                </li>
+              </ul>
+              <div class="tag-row">
+                <div class="tag">Ökosysteme</div>
+                <div class="tag">Hosting</div>
+                <div class="tag">Headless CMS</div>
+              </div>
+            </div>
+            <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Netzwerk aus Framework-Logos"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <circle cx="160" cy="110" r="36" fill="#f24b29" />
+                  <text x="138" y="116" font-size="12" font-family="sans-serif" fill="#fff">
+                    SPA
+                  </text>
+                  <circle cx="70" cy="60" r="24" fill="#1b9aaa" />
+                  <circle cx="250" cy="60" r="24" fill="#1b9aaa" />
+                  <circle cx="70" cy="170" r="24" fill="#1b9aaa" />
+                  <circle cx="250" cy="170" r="24" fill="#1b9aaa" />
+                  <path
+                    d="M95 65 L135 95"
+                    stroke="#1c1a18"
+                    stroke-width="2"
+                  />
+                  <path
+                    d="M225 65 L185 95"
+                    stroke="#1c1a18"
+                    stroke-width="2"
+                  />
+                  <path
+                    d="M95 170 L135 125"
+                    stroke="#1c1a18"
+                    stroke-width="2"
+                  />
+                  <path
+                    d="M225 170 L185 125"
+                    stroke="#1c1a18"
+                    stroke-width="2"
+                  />
+                </svg>
+              </div>
+              <div class="legend">Frameworks bilden den Kern, Plattformen liefern Infrastruktur.</div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Anwendungsbereiche</h3>
+              <h2>Wo SPAs glänzen</h2>
+              <ul>
+                <li>Produktivitätstools: CRM, Analytics, Projektmanagement.</li>
+                <li>Finanzen & E-Commerce: Dashboards, Checkout-Flows.</li>
+                <li>Medien: Streaming, interaktive Storytelling-Seiten.</li>
+                <li>IoT & Industriepanele: Echtzeit-Monitoring.</li>
+              </ul>
+              <p>
+                SPAs sind stark, wenn Nutzer viel navigieren und Daten in kurzen
+                Intervallen aktualisiert werden.
+              </p>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>Interaktionsdichte</span>
+                <strong>Sehr hoch</strong>
+              </div>
+              <div class="stat">
+                <span>Beispiele</span>
+                <strong>Notion · Figma · Jira</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Entwicklungswerkzeuge</h3>
+              <h2>Toolkit für SPAs</h2>
+              <ul>
+                <li>
+                  Bundler: Vite, Webpack, Parcel für Assets und Hot Reload.
+                </li>
+                <li>
+                  State: Redux, Zustand, Pinia oder Signals.
+                </li>
+                <li>
+                  Testing: Playwright/Cypress für E2E, Vitest/Jest für Unit.
+                </li>
+                <li>
+                  Observability: LogRocket, Sentry, Datadog für Monitoring.
+                </li>
+              </ul>
+            </div>
+            <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Werkzeugkasten"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="60" y="70" width="200" height="90" rx="16" fill="#f2c14e" />
+                  <rect x="90" y="50" width="140" height="30" rx="12" fill="#1b9aaa" />
+                  <circle cx="110" cy="115" r="12" fill="#f24b29" />
+                  <circle cx="160" cy="115" r="12" fill="#f24b29" />
+                  <circle cx="210" cy="115" r="12" fill="#f24b29" />
+                </svg>
+              </div>
+              <div class="legend">Toolchain entscheidet über Geschwindigkeit und Stabilität.</div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Programmiersprachen</h3>
+              <h2>Sprachen & Paradigmen</h2>
+              <ul>
+                <li>JavaScript/TypeScript sind Standard für SPA-Logik.</li>
+                <li>
+                  HTML/CSS definieren Struktur und Layout, oft ergänzt durch
+                  CSS-in-JS oder Utility-Frameworks.
+                </li>
+                <li>
+                  WASM erlaubt Performance-Module in Rust, Go oder C++.
+                </li>
+                <li>
+                  Backend-Sprachen liefern APIs: Node.js, Python, Java, .NET.
+                </li>
+              </ul>
+              <div class="tag-row">
+                <div class="tag">Type Safety</div>
+                <div class="tag">Component Driven</div>
+                <div class="tag">API First</div>
+              </div>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>Dominanz</span>
+                <strong>TypeScript wächst</strong>
+              </div>
+              <div class="stat">
+                <span>Interoperabilität</span>
+                <strong>REST · GraphQL · gRPC</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Vorteile</h3>
+              <h2>Warum Teams SPAs lieben</h2>
+              <ul>
+                <li>Sehr schnelle Navigation nach dem ersten Laden.</li>
+                <li>App-ähnliche UX, reiche Interaktionen.</li>
+                <li>Wiederverwendbare Komponenten, klare UI-Architektur.</li>
+                <li>Offline- und PWA-Fähigkeiten möglich.</li>
+              </ul>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>User Experience</span>
+                <strong>Gefühl wie native App</strong>
+              </div>
+              <div class="stat">
+                <span>Wartbarkeit</span>
+                <strong>Komponenten & Design-Systeme</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Nachteile</h3>
+              <h2>Worauf man achten muss</h2>
+              <ul>
+                <li>
+                  Größerer Initial-Download, damit langsamerer First Paint.
+                </li>
+                <li>SEO ist komplexer ohne Server Rendering.</li>
+                <li>State-Management und Datenkonsistenz werden anspruchsvoll.</li>
+                <li>Browser-Kompatibilität und Memory-Leaks müssen überwacht werden.</li>
+              </ul>
+              <p>
+                Moderne Strategien wie SSR/SSG, Code Splitting und Islands
+                reduzieren diese Risiken.
+              </p>
+            </div>
+            <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Balance zwischen Vor- und Nachteilen"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="60" y="140" width="200" height="16" fill="#1c1a18" />
+                  <circle cx="120" cy="120" r="18" fill="#f24b29" />
+                  <circle cx="200" cy="100" r="18" fill="#1b9aaa" />
+                  <line x1="80" y1="140" x2="240" y2="140" stroke="#1c1a18" stroke-width="4" />
+                </svg>
+              </div>
+              <div class="legend">Balance zwischen Nutzererlebnis und Komplexität.</div>
+            </div>
+          </article>
+
+          <article class="slide">
+            <div>
+              <h3>Trends</h3>
+              <h2>Wohin entwickelt sich die SPA?</h2>
+              <ul>
+                <li>
+                  Hybrid-Rendering: SSR, Streaming und Islands für schnellere
+                  Starts.
+                </li>
+                <li>
+                  Edge Computing: Logik näher am Nutzer, z.B. CDN Functions.
+                </li>
+                <li>
+                  Design Systems: konsistente UI, effiziente Skalierung.
+                </li>
+                <li>
+                  AI-gestützte Interfaces: personalisierte Workflows, Chat-UX.
+                </li>
+              </ul>
+              <div class="tag-row">
+                <div class="tag">Islands</div>
+                <div class="tag">Edge</div>
+                <div class="tag">Streaming</div>
+              </div>
+            </div>
+            <div class="visual">
+              <div class="stat">
+                <span>Ziel</span>
+                <strong>Faster by Design</strong>
+              </div>
+              <div class="stat">
+                <span>UX-Anspruch</span>
+                <strong>Personalisierung</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide full">
+            <div>
+              <h3>Wrap-up</h3>
+              <h2>Essenz in drei Sätzen</h2>
+              <p>
+                SPAs liefern App-ähnliche Erlebnisse im Browser, wenn Interaktion
+                und Reaktionsgeschwindigkeit zählen. Sie benötigen aber ein
+                solides Architektur-Setup für Performance, SEO und State. Das
+                Ökosystem entwickelt sich Richtung Hybrid-Ansätze, die das Beste
+                aus SPA und SSR kombinieren.
+              </p>
+              <div class="tag-row">
+                <div class="tag">Fragen?</div>
+                <div class="tag">Danke!</div>
+                <div class="tag">Let’s build</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer>
+        <div class="progress" aria-hidden="true">
+          <span id="progress"></span>
+        </div>
+        <div class="dots" id="dots" role="tablist" aria-label="Folie auswählen"></div>
+        <div class="nav">
+          <button type="button" id="prev">Zurück</button>
+          <button type="button" id="next">Weiter</button>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const dots = document.getElementById("dots");
+      const progress = document.getElementById("progress");
+      const prev = document.getElementById("prev");
+      const next = document.getElementById("next");
+      let index = 0;
+
+      const updateSlides = (nextIndex) => {
+        const current = slides[index];
+        current.classList.remove("active");
+        current.classList.add("outgoing");
+
+        index = (nextIndex + slides.length) % slides.length;
+        const nextSlide = slides[index];
+        nextSlide.classList.remove("outgoing");
+        nextSlide.classList.add("active");
+
+        slides.forEach((slide, i) => {
+          slide.setAttribute("aria-hidden", i !== index);
+        });
+
+        const percent = ((index + 1) / slides.length) * 100;
+        progress.style.width = `${percent}%`;
+
+        dots.querySelectorAll("button").forEach((dot, i) => {
+          dot.classList.toggle("active", i === index);
+        });
+      };
+
+      const buildDots = () => {
+        dots.innerHTML = "";
+        slides.forEach((_, i) => {
+          const dot = document.createElement("button");
+          dot.className = "dot";
+          dot.type = "button";
+          dot.setAttribute("aria-label", `Folie ${i + 1}`);
+          dot.addEventListener("click", () => updateSlides(i));
+          dots.appendChild(dot);
+        });
+      };
+
+      const handleKey = (event) => {
+        if (event.key === "ArrowRight" || event.key === " ") {
+          updateSlides(index + 1);
+        }
+        if (event.key === "ArrowLeft") {
+          updateSlides(index - 1);
+        }
+        if (event.key >= "1" && event.key <= "9") {
+          const jump = Number(event.key) - 1;
+          if (jump < slides.length) updateSlides(jump);
+        }
+      };
+
+      buildDots();
+      updateSlides(0);
+      prev.addEventListener("click", () => updateSlides(index - 1));
+      next.addEventListener("click", () => updateSlides(index + 1));
+      document.addEventListener("keydown", handleKey);
+    </script>
+  </body>
+</html>
