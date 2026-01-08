@@ -6,15 +6,20 @@
     <title>SPA: Präsentation als Single Page App</title>
     <style>
       :root {
-        --bg: #f3efe9;
-        --bg-deep: #d8cfc3;
-        --ink: #1c1a18;
-        --accent: #f24b29;
-        --accent-2: #1b9aaa;
-        --accent-3: #f2c14e;
-        --shadow: rgba(28, 26, 24, 0.18);
-        --glass: rgba(255, 255, 255, 0.65);
-        --slide-radius: 28px;
+        --bg: #151328;
+        --bg-deep: #1d2340;
+        --ink: #f7f3ff;
+        --accent: #ff6b35;
+        --accent-2: #41ead4;
+        --accent-3: #f7b801;
+        --shadow: rgba(4, 4, 10, 0.55);
+        --glass: rgba(255, 255, 255, 0.12);
+        --glass-strong: rgba(255, 255, 255, 0.22);
+        --glass-border: rgba(255, 255, 255, 0.25);
+        --slide-radius: 34px;
+        --glow: rgba(255, 107, 53, 0.35);
+        --glow-2: rgba(65, 234, 212, 0.28);
+        --glow-3: rgba(247, 184, 1, 0.25);
         --mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono",
           monospace;
         --display: "Fraunces", "Times New Roman", serif;
@@ -30,14 +35,19 @@
         font-family: var(--ui);
         color: var(--ink);
         background: radial-gradient(
-            circle at 15% 10%,
-            rgba(242, 193, 78, 0.45),
+            circle at 12% 15%,
+            rgba(255, 107, 53, 0.4),
             transparent 45%
           ),
           radial-gradient(
-            circle at 85% 20%,
-            rgba(27, 154, 170, 0.35),
+            circle at 80% 20%,
+            rgba(65, 234, 212, 0.35),
             transparent 40%
+          ),
+          radial-gradient(
+            circle at 50% 80%,
+            rgba(247, 184, 1, 0.25),
+            transparent 45%
           ),
           linear-gradient(135deg, var(--bg), var(--bg-deep));
         min-height: 100vh;
@@ -49,6 +59,21 @@
         height: 100vh;
         display: grid;
         grid-template-rows: auto 1fr auto;
+      }
+
+      main::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0.06),
+          transparent 50%,
+          rgba(255, 255, 255, 0.04)
+        );
+        opacity: 0.6;
+        pointer-events: none;
+        animation: shimmer 12s linear infinite;
       }
 
       header {
@@ -83,15 +108,51 @@
         height: min(640px, 72vh);
         position: relative;
         overflow: hidden;
+        border-radius: calc(var(--slide-radius) + 8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 40px 120px -70px var(--shadow);
+      }
+
+      .slides::before,
+      .slides::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(14px);
+        opacity: 0.5;
+        z-index: 0;
+        animation: float 10s ease-in-out infinite;
+      }
+
+      .slides::before {
+        width: 240px;
+        height: 240px;
+        background: linear-gradient(135deg, #ff6b35, #f7b801, #ff8a5c);
+        top: -60px;
+        left: -80px;
+      }
+
+      .slides::after {
+        width: 280px;
+        height: 280px;
+        background: linear-gradient(135deg, #41ead4, #2d98da, #7b61ff);
+        bottom: -90px;
+        right: -100px;
+        animation-delay: -4s;
       }
 
       .slide {
         position: absolute;
         inset: 0;
-        background: var(--glass);
+        background: linear-gradient(
+          140deg,
+          rgba(255, 255, 255, 0.22),
+          rgba(255, 255, 255, 0.08)
+        );
+        border: 1px solid var(--glass-border);
         border-radius: var(--slide-radius);
-        box-shadow: 0 28px 80px -40px var(--shadow);
-        backdrop-filter: blur(16px);
+        box-shadow: 0 28px 90px -50px var(--shadow);
+        backdrop-filter: blur(22px) saturate(140%);
         padding: 48px 56px;
         display: grid;
         grid-template-columns: 1.2fr 0.8fr;
@@ -99,12 +160,16 @@
         opacity: 0;
         transform: translateX(6%) scale(0.98);
         transition: opacity 0.6s ease, transform 0.6s ease;
+        z-index: 1;
       }
 
       .slide.active {
         opacity: 1;
         transform: translateX(0) scale(1);
         z-index: 2;
+        box-shadow: 0 30px 120px -60px var(--shadow),
+          0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 0 80px -40px var(--glow);
       }
 
       .slide.outgoing {
@@ -121,12 +186,14 @@
         font-family: var(--display);
         font-size: clamp(2.5rem, 4vw, 3.8rem);
         margin: 0 0 12px 0;
+        text-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
       }
 
       .slide h2 {
         font-family: var(--display);
         font-size: clamp(2rem, 3.2vw, 3rem);
         margin: 0 0 12px 0;
+        text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       }
 
       .slide h3 {
@@ -134,7 +201,7 @@
         letter-spacing: 0.18em;
         text-transform: uppercase;
         margin: 0 0 16px 0;
-        color: rgba(28, 26, 24, 0.6);
+        color: rgba(255, 255, 255, 0.6);
       }
 
       .slide p {
@@ -165,13 +232,19 @@
         font-size: 0.85rem;
         padding: 8px 12px;
         border-radius: 999px;
-        background: rgba(28, 26, 24, 0.08);
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
       }
 
       .stat {
         display: grid;
         gap: 6px;
-        background: rgba(255, 255, 255, 0.75);
+        background: linear-gradient(
+          140deg,
+          rgba(255, 255, 255, 0.25),
+          rgba(255, 255, 255, 0.08)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 18px;
         padding: 18px 20px;
         box-shadow: 0 18px 40px -28px var(--shadow);
@@ -180,7 +253,7 @@
       .stat span {
         font-family: var(--mono);
         font-size: 0.85rem;
-        color: rgba(28, 26, 24, 0.65);
+        color: rgba(255, 255, 255, 0.6);
       }
 
       .stat strong {
@@ -194,16 +267,18 @@
       }
 
       .svg-frame {
-        background: #fff;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 22px;
         padding: 16px;
-        box-shadow: 0 20px 60px -36px var(--shadow);
+        box-shadow: 0 20px 60px -36px var(--shadow),
+          0 0 40px -30px var(--glow-2);
       }
 
       .legend {
         font-family: var(--mono);
         font-size: 0.85rem;
-        color: rgba(28, 26, 24, 0.6);
+        color: rgba(255, 255, 255, 0.65);
       }
 
       footer {
@@ -218,9 +293,10 @@
       .progress {
         height: 8px;
         border-radius: 999px;
-        background: rgba(28, 26, 24, 0.1);
+        background: rgba(255, 255, 255, 0.12);
         overflow: hidden;
         width: 220px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
       .progress > span {
@@ -229,6 +305,7 @@
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
         width: 0%;
         transition: width 0.4s ease;
+        box-shadow: 0 0 16px var(--glow-2);
       }
 
       .dots {
@@ -240,13 +317,14 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: rgba(28, 26, 24, 0.25);
+        background: rgba(255, 255, 255, 0.25);
         border: none;
         cursor: pointer;
       }
 
       .dot.active {
         background: var(--accent);
+        box-shadow: 0 0 10px var(--glow);
       }
 
       .nav {
@@ -259,13 +337,16 @@
         padding: 10px 16px;
         border-radius: 999px;
         font-family: var(--mono);
-        background: rgba(28, 26, 24, 0.08);
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         cursor: pointer;
-        transition: transform 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
 
       .nav button:hover {
         transform: translateY(-2px);
+        box-shadow: 0 8px 24px -18px var(--glow-2);
       }
 
       .agenda {
@@ -276,10 +357,52 @@
       }
 
       .agenda div {
-        background: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 14px;
         padding: 10px 12px;
         font-size: 0.95rem;
+      }
+
+      .brand {
+        color: var(--ink);
+        text-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      }
+
+      .hint {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .deck::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+          rgba(255, 255, 255, 0.08) 1px,
+          transparent 1px
+        );
+        background-size: 28px 28px;
+        opacity: 0.15;
+        pointer-events: none;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) translateX(0);
+        }
+        50% {
+          transform: translateY(12px) translateX(8px);
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-40%);
+        }
+        100% {
+          transform: translateX(40%);
+        }
       }
 
       @media (max-width: 900px) {
@@ -329,8 +452,26 @@
       </header>
 
       <section class="deck">
-        <div class="slides" id="slides">
-          <article class="slide active full">
+        <div class="slides" id="slides"></div>
+      </section>
+
+      <footer>
+        <div class="progress" aria-hidden="true">
+          <span id="progress"></span>
+        </div>
+        <div class="dots" id="dots" role="tablist" aria-label="Folie auswählen"></div>
+        <div class="nav">
+          <button type="button" id="prev">Zurück</button>
+          <button type="button" id="next">Weiter</button>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      const slidesData = [
+        {
+          full: true,
+          content: `
             <div>
               <h3>Präsentation als SPA</h3>
               <h1>Single Page Applications</h1>
@@ -346,9 +487,10 @@
                 <div class="tag">Ohne Seitenreload</div>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Agenda</h3>
               <h2>Was erwartet euch?</h2>
@@ -379,9 +521,10 @@
                 <strong>Routing ohne Reload</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Historie</h3>
               <h2>Vom Dokument zur App</h2>
@@ -440,9 +583,10 @@
                 Von HTML-Dokumenten hin zu komplexen SPA-Ökosystemen.
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Funktionsweise</h3>
               <h2>Einmal laden, dann reagieren</h2>
@@ -517,9 +661,10 @@
               </div>
               <div class="legend">UI reagiert auf State, nicht auf Seitenreload.</div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Eingabe & Ausgabe</h3>
               <h2>Interaktion in Echtzeit</h2>
@@ -541,6 +686,57 @@
               </ul>
             </div>
             <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Eingabe und Ausgabe im SPA-Flow"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="30" y="40" width="110" height="60" rx="12" fill="#1b9aaa" />
+                  <text x="52" y="74" font-size="12" font-family="sans-serif" fill="#fff">
+                    Input
+                  </text>
+                  <rect x="180" y="40" width="110" height="60" rx="12" fill="#f24b29" />
+                  <text x="198" y="74" font-size="12" font-family="sans-serif" fill="#fff">
+                    UI
+                  </text>
+                  <rect x="105" y="130" width="110" height="60" rx="12" fill="#f2c14e" />
+                  <text x="120" y="165" font-size="12" font-family="sans-serif">
+                    Output
+                  </text>
+                  <path
+                    d="M140 70 L180 70"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-io)"
+                  />
+                  <path
+                    d="M220 100 L170 130"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-io)"
+                  />
+                  <path
+                    d="M100 100 L150 130"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-io)"
+                  />
+                  <defs>
+                    <marker
+                      id="arrow-io"
+                      markerWidth="10"
+                      markerHeight="10"
+                      refX="6"
+                      refY="3"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div class="stat">
                 <span>Reaktionszeit</span>
                 <strong>~16 ms pro Frame</strong>
@@ -550,9 +746,10 @@
                 <strong>Touch · Maus · Voice</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Anbieter</h3>
               <h2>Frameworks & Plattformen</h2>
@@ -616,9 +813,10 @@
               </div>
               <div class="legend">Frameworks bilden den Kern, Plattformen liefern Infrastruktur.</div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Anwendungsbereiche</h3>
               <h2>Wo SPAs glänzen</h2>
@@ -634,6 +832,31 @@
               </p>
             </div>
             <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Beispiele für SPA-Anwendungen"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="24" y="30" width="120" height="70" rx="12" fill="#f2c14e" />
+                  <text x="40" y="68" font-size="12" font-family="sans-serif">
+                    Dashboard
+                  </text>
+                  <rect x="176" y="30" width="120" height="70" rx="12" fill="#1b9aaa" />
+                  <text x="196" y="68" font-size="12" font-family="sans-serif" fill="#fff">
+                    Commerce
+                  </text>
+                  <rect x="24" y="120" width="120" height="70" rx="12" fill="#f24b29" />
+                  <text x="46" y="158" font-size="12" font-family="sans-serif" fill="#fff">
+                    Media
+                  </text>
+                  <rect x="176" y="120" width="120" height="70" rx="12" fill="#1c1a18" />
+                  <text x="200" y="158" font-size="12" font-family="sans-serif" fill="#fff">
+                    IoT
+                  </text>
+                </svg>
+              </div>
               <div class="stat">
                 <span>Interaktionsdichte</span>
                 <strong>Sehr hoch</strong>
@@ -643,9 +866,10 @@
                 <strong>Notion · Figma · Jira</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Entwicklungswerkzeuge</h3>
               <h2>Toolkit für SPAs</h2>
@@ -681,9 +905,10 @@
               </div>
               <div class="legend">Toolchain entscheidet über Geschwindigkeit und Stabilität.</div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Programmiersprachen</h3>
               <h2>Sprachen & Paradigmen</h2>
@@ -707,6 +932,51 @@
               </div>
             </div>
             <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Sprachen im SPA-Stack"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <circle cx="90" cy="100" r="38" fill="#f24b29" />
+                  <text x="70" y="106" font-size="12" font-family="sans-serif" fill="#fff">
+                    JS/TS
+                  </text>
+                  <circle cx="230" cy="100" r="38" fill="#1b9aaa" />
+                  <text x="210" y="106" font-size="12" font-family="sans-serif" fill="#fff">
+                    WASM
+                  </text>
+                  <rect x="110" y="150" width="100" height="40" rx="12" fill="#f2c14e" />
+                  <text x="130" y="175" font-size="12" font-family="sans-serif">
+                    API
+                  </text>
+                  <path
+                    d="M120 120 L150 150"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-lang)"
+                  />
+                  <path
+                    d="M200 120 L170 150"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-lang)"
+                  />
+                  <defs>
+                    <marker
+                      id="arrow-lang"
+                      markerWidth="10"
+                      markerHeight="10"
+                      refX="6"
+                      refY="3"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div class="stat">
                 <span>Dominanz</span>
                 <strong>TypeScript wächst</strong>
@@ -716,9 +986,10 @@
                 <strong>REST · GraphQL · gRPC</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Vorteile</h3>
               <h2>Warum Teams SPAs lieben</h2>
@@ -730,6 +1001,26 @@
               </ul>
             </div>
             <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Schnelligkeit und Nutzererlebnis"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <path
+                    d="M60 150 A100 100 0 0 1 260 150"
+                    fill="none"
+                    stroke="#1c1a18"
+                    stroke-width="8"
+                  />
+                  <line x1="160" y1="150" x2="220" y2="110" stroke="#f24b29" stroke-width="6" />
+                  <circle cx="160" cy="150" r="10" fill="#1b9aaa" />
+                  <text x="120" y="190" font-size="12" font-family="sans-serif">
+                    Speed
+                  </text>
+                </svg>
+              </div>
               <div class="stat">
                 <span>User Experience</span>
                 <strong>Gefühl wie native App</strong>
@@ -739,9 +1030,10 @@
                 <strong>Komponenten & Design-Systeme</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Nachteile</h3>
               <h2>Worauf man achten muss</h2>
@@ -774,9 +1066,10 @@
               </div>
               <div class="legend">Balance zwischen Nutzererlebnis und Komplexität.</div>
             </div>
-          </article>
-
-          <article class="slide">
+          `,
+        },
+        {
+          content: `
             <div>
               <h3>Trends</h3>
               <h2>Wohin entwickelt sich die SPA?</h2>
@@ -802,6 +1095,51 @@
               </div>
             </div>
             <div class="visual">
+              <div class="svg-frame">
+                <svg
+                  viewBox="0 0 320 220"
+                  role="img"
+                  aria-label="Trends: Islands, Edge, AI"
+                >
+                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
+                  <rect x="30" y="40" width="80" height="50" rx="12" fill="#f2c14e" />
+                  <text x="42" y="70" font-size="12" font-family="sans-serif">
+                    Islands
+                  </text>
+                  <rect x="210" y="40" width="80" height="50" rx="12" fill="#1b9aaa" />
+                  <text x="232" y="70" font-size="12" font-family="sans-serif" fill="#fff">
+                    Edge
+                  </text>
+                  <rect x="120" y="120" width="80" height="50" rx="12" fill="#f24b29" />
+                  <text x="144" y="150" font-size="12" font-family="sans-serif" fill="#fff">
+                    AI
+                  </text>
+                  <path
+                    d="M110 80 L160 120"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-trend)"
+                  />
+                  <path
+                    d="M250 80 L200 120"
+                    stroke="#1c1a18"
+                    stroke-width="3"
+                    marker-end="url(#arrow-trend)"
+                  />
+                  <defs>
+                    <marker
+                      id="arrow-trend"
+                      markerWidth="10"
+                      markerHeight="10"
+                      refX="6"
+                      refY="3"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div class="stat">
                 <span>Ziel</span>
                 <strong>Faster by Design</strong>
@@ -811,9 +1149,11 @@
                 <strong>Personalisierung</strong>
               </div>
             </div>
-          </article>
-
-          <article class="slide full">
+          `,
+        },
+        {
+          full: true,
+          content: `
             <div>
               <h3>Wrap-up</h3>
               <h2>Essenz in drei Sätzen</h2>
@@ -830,39 +1170,46 @@
                 <div class="tag">Let’s build</div>
               </div>
             </div>
-          </article>
-        </div>
-      </section>
+          `,
+        },
+      ];
 
-      <footer>
-        <div class="progress" aria-hidden="true">
-          <span id="progress"></span>
-        </div>
-        <div class="dots" id="dots" role="tablist" aria-label="Folie auswählen"></div>
-        <div class="nav">
-          <button type="button" id="prev">Zurück</button>
-          <button type="button" id="next">Weiter</button>
-        </div>
-      </footer>
-    </main>
-
-    <script>
-      const slides = Array.from(document.querySelectorAll(".slide"));
+      const slidesRoot = document.getElementById("slides");
       const dots = document.getElementById("dots");
       const progress = document.getElementById("progress");
       const prev = document.getElementById("prev");
       const next = document.getElementById("next");
+      let slides = [];
       let index = 0;
 
-      const updateSlides = (nextIndex) => {
-        const current = slides[index];
-        current.classList.remove("active");
-        current.classList.add("outgoing");
+      const renderSlides = () => {
+        slidesRoot.innerHTML = "";
+        slidesData.forEach((slide) => {
+          const article = document.createElement("article");
+          article.className = "slide";
+          if (slide.full) article.classList.add("full");
+          article.innerHTML = slide.content.trim();
+          slidesRoot.appendChild(article);
+        });
+        slides = Array.from(document.querySelectorAll(".slide"));
+      };
 
-        index = (nextIndex + slides.length) % slides.length;
-        const nextSlide = slides[index];
-        nextSlide.classList.remove("outgoing");
-        nextSlide.classList.add("active");
+      const updateSlides = (nextIndex) => {
+        const nextSafe = (nextIndex + slides.length) % slides.length;
+        const current = slides[index];
+        const nextSlide = slides[nextSafe];
+
+        if (current === nextSlide) {
+          current.classList.add("active");
+          current.classList.remove("outgoing");
+        } else {
+          current.classList.remove("active");
+          current.classList.add("outgoing");
+          nextSlide.classList.remove("outgoing");
+          nextSlide.classList.add("active");
+        }
+
+        index = nextSafe;
 
         slides.forEach((slide, i) => {
           slide.setAttribute("aria-hidden", i !== index);
@@ -901,6 +1248,7 @@
         }
       };
 
+      renderSlides();
       buildDots();
       updateSlides(0);
       prev.addEventListener("click", () => updateSlides(index - 1));
