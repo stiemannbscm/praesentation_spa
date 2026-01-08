@@ -6,20 +6,21 @@
     <title>SPA: Präsentation als Single Page App</title>
     <style>
       :root {
-        --bg: #151328;
-        --bg-deep: #1d2340;
-        --ink: #f7f3ff;
-        --accent: #ff6b35;
-        --accent-2: #41ead4;
-        --accent-3: #f7b801;
-        --shadow: rgba(4, 4, 10, 0.55);
-        --glass: rgba(255, 255, 255, 0.12);
-        --glass-strong: rgba(255, 255, 255, 0.22);
-        --glass-border: rgba(255, 255, 255, 0.25);
+        --bg: #f4f6fb;
+        --bg-deep: #dde3ee;
+        --ink: #171a21;
+        --accent: #1f5eff;
+        --accent-2: #0aa5a4;
+        --accent-3: #f4b740;
+        --shadow: rgba(15, 20, 35, 0.18);
+        --glass: rgba(255, 255, 255, 0.72);
+        --glass-strong: rgba(255, 255, 255, 0.88);
+        --glass-border: rgba(255, 255, 255, 0.65);
         --slide-radius: 34px;
-        --glow: rgba(255, 107, 53, 0.35);
-        --glow-2: rgba(65, 234, 212, 0.28);
-        --glow-3: rgba(247, 184, 1, 0.25);
+        --glow: rgba(31, 94, 255, 0.16);
+        --glow-2: rgba(10, 165, 164, 0.12);
+        --glow-3: rgba(244, 183, 64, 0.18);
+        --focus: #1f5eff;
         --mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono",
           monospace;
         --display: "Fraunces", "Times New Roman", serif;
@@ -30,23 +31,56 @@
         box-sizing: border-box;
       }
 
+      .skip-link {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #101018;
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        text-decoration: none;
+        transform: translateY(-200%);
+        transition: transform 0.2s ease;
+        z-index: 10;
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
       body {
         margin: 0;
         font-family: var(--ui);
         color: var(--ink);
         background: radial-gradient(
             circle at 12% 15%,
-            rgba(255, 107, 53, 0.4),
+            rgba(31, 94, 255, 0.12),
             transparent 45%
           ),
           radial-gradient(
             circle at 80% 20%,
-            rgba(65, 234, 212, 0.35),
+            rgba(10, 165, 164, 0.12),
             transparent 40%
           ),
           radial-gradient(
             circle at 50% 80%,
-            rgba(247, 184, 1, 0.25),
+            rgba(244, 183, 64, 0.12),
             transparent 45%
           ),
           linear-gradient(135deg, var(--bg), var(--bg-deep));
@@ -92,7 +126,7 @@
 
       .hint {
         font-family: var(--mono);
-        color: rgba(28, 26, 24, 0.55);
+        color: rgba(23, 26, 33, 0.6);
       }
 
       .deck {
@@ -109,8 +143,8 @@
         position: relative;
         overflow: hidden;
         border-radius: calc(var(--slide-radius) + 8px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 40px 120px -70px var(--shadow);
+        border: 1px solid rgba(23, 26, 33, 0.08);
+        box-shadow: 0 30px 90px -60px var(--shadow);
       }
 
       .slides::before,
@@ -127,7 +161,7 @@
       .slides::before {
         width: 240px;
         height: 240px;
-        background: linear-gradient(135deg, #ff6b35, #f7b801, #ff8a5c);
+        background: linear-gradient(135deg, #b3c7ff, #f7e7b1);
         top: -60px;
         left: -80px;
       }
@@ -135,7 +169,7 @@
       .slides::after {
         width: 280px;
         height: 280px;
-        background: linear-gradient(135deg, #41ead4, #2d98da, #7b61ff);
+        background: linear-gradient(135deg, #bfe9e8, #d6e3ff);
         bottom: -90px;
         right: -100px;
         animation-delay: -4s;
@@ -146,13 +180,13 @@
         inset: 0;
         background: linear-gradient(
           140deg,
-          rgba(255, 255, 255, 0.22),
-          rgba(255, 255, 255, 0.08)
+          rgba(255, 255, 255, 0.92),
+          rgba(255, 255, 255, 0.65)
         );
         border: 1px solid var(--glass-border);
         border-radius: var(--slide-radius);
-        box-shadow: 0 28px 90px -50px var(--shadow);
-        backdrop-filter: blur(22px) saturate(140%);
+        box-shadow: 0 26px 70px -50px var(--shadow);
+        backdrop-filter: blur(16px) saturate(120%);
         padding: 48px 56px;
         display: grid;
         grid-template-columns: 1.2fr 0.8fr;
@@ -163,13 +197,18 @@
         z-index: 1;
       }
 
+      .slide:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 6px;
+      }
+
       .slide.active {
         opacity: 1;
         transform: translateX(0) scale(1);
         z-index: 2;
         box-shadow: 0 30px 120px -60px var(--shadow),
           0 0 0 1px rgba(255, 255, 255, 0.08),
-          0 0 80px -40px var(--glow);
+          0 0 50px -40px var(--glow);
       }
 
       .slide.outgoing {
@@ -186,14 +225,14 @@
         font-family: var(--display);
         font-size: clamp(2.5rem, 4vw, 3.8rem);
         margin: 0 0 12px 0;
-        text-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
       }
 
       .slide h2 {
         font-family: var(--display);
         font-size: clamp(2rem, 3.2vw, 3rem);
         margin: 0 0 12px 0;
-        text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
       }
 
       .slide h3 {
@@ -201,12 +240,13 @@
         letter-spacing: 0.18em;
         text-transform: uppercase;
         margin: 0 0 16px 0;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(23, 26, 33, 0.6);
       }
 
       .slide p {
         font-size: 1.08rem;
         line-height: 1.6;
+        color: rgba(23, 26, 33, 0.85);
       }
 
       .slide ul {
@@ -218,6 +258,7 @@
 
       .slide li {
         line-height: 1.5;
+        color: rgba(23, 26, 33, 0.85);
       }
 
       .tag-row {
@@ -232,8 +273,8 @@
         font-size: 0.85rem;
         padding: 8px 12px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(23, 26, 33, 0.12);
       }
 
       .stat {
@@ -241,10 +282,10 @@
         gap: 6px;
         background: linear-gradient(
           140deg,
-          rgba(255, 255, 255, 0.25),
-          rgba(255, 255, 255, 0.08)
+          rgba(255, 255, 255, 0.96),
+          rgba(255, 255, 255, 0.7)
         );
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(23, 26, 33, 0.12);
         border-radius: 18px;
         padding: 18px 20px;
         box-shadow: 0 18px 40px -28px var(--shadow);
@@ -253,7 +294,7 @@
       .stat span {
         font-family: var(--mono);
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(23, 26, 33, 0.65);
       }
 
       .stat strong {
@@ -268,7 +309,7 @@
 
       .svg-frame {
         background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(23, 26, 33, 0.12);
         border-radius: 22px;
         padding: 16px;
         box-shadow: 0 20px 60px -36px var(--shadow),
@@ -278,7 +319,7 @@
       .legend {
         font-family: var(--mono);
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.65);
+        color: rgba(23, 26, 33, 0.6);
       }
 
       footer {
@@ -293,10 +334,10 @@
       .progress {
         height: 8px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(23, 26, 33, 0.12);
         overflow: hidden;
         width: 220px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(23, 26, 33, 0.12);
       }
 
       .progress > span {
@@ -317,7 +358,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(23, 26, 33, 0.25);
         border: none;
         cursor: pointer;
       }
@@ -338,8 +379,8 @@
         border-radius: 999px;
         font-family: var(--mono);
         color: var(--ink);
-        background: rgba(255, 255, 255, 0.18);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(23, 26, 33, 0.16);
         cursor: pointer;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
@@ -347,6 +388,12 @@
       .nav button:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 24px -18px var(--glow-2);
+      }
+
+      .nav button:focus-visible,
+      .dot:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
       }
 
       .agenda {
@@ -357,8 +404,8 @@
       }
 
       .agenda div {
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(23, 26, 33, 0.12);
         border-radius: 14px;
         padding: 10px 12px;
         font-size: 0.95rem;
@@ -366,7 +413,7 @@
 
       .brand {
         color: var(--ink);
-        text-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        text-shadow: 0 6px 16px rgba(15, 20, 35, 0.18);
       }
 
       .hint {
@@ -378,7 +425,7 @@
         position: absolute;
         inset: 0;
         background-image: radial-gradient(
-          rgba(255, 255, 255, 0.08) 1px,
+          rgba(23, 26, 33, 0.06) 1px,
           transparent 1px
         );
         background-size: 28px 28px;
@@ -402,6 +449,15 @@
         }
         100% {
           transform: translateX(40%);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
         }
       }
 
@@ -445,25 +501,27 @@
     </style>
   </head>
   <body>
+    <a class="skip-link" href="#slides">Direkt zu den Folien</a>
     <main>
       <header>
         <div class="brand">Single Page Apps</div>
         <div class="hint">←/→ wechseln · Leertaste · 1–9 direkt</div>
       </header>
 
-      <section class="deck">
-        <div class="slides" id="slides"></div>
+      <section class="deck" aria-label="Präsentationsfolien">
+        <div class="slides" id="slides" tabindex="-1"></div>
       </section>
 
       <footer>
         <div class="progress" aria-hidden="true">
           <span id="progress"></span>
         </div>
-        <div class="dots" id="dots" role="tablist" aria-label="Folie auswählen"></div>
-        <div class="nav">
-          <button type="button" id="prev">Zurück</button>
-          <button type="button" id="next">Weiter</button>
+        <div class="dots" id="dots" aria-label="Folie auswählen"></div>
+        <div class="nav" aria-label="Foliensnavigation">
+          <button type="button" id="prev" aria-controls="slides">Zurück</button>
+          <button type="button" id="next" aria-controls="slides">Weiter</button>
         </div>
+        <div class="sr-only" id="slide-status" aria-live="polite"></div>
       </footer>
     </main>
 
@@ -1179,16 +1237,26 @@
       const progress = document.getElementById("progress");
       const prev = document.getElementById("prev");
       const next = document.getElementById("next");
+      const slideStatus = document.getElementById("slide-status");
       let slides = [];
       let index = 0;
 
       const renderSlides = () => {
         slidesRoot.innerHTML = "";
-        slidesData.forEach((slide) => {
+        slidesData.forEach((slide, i) => {
           const article = document.createElement("article");
           article.className = "slide";
           if (slide.full) article.classList.add("full");
           article.innerHTML = slide.content.trim();
+          const heading =
+            article.querySelector("h1") ||
+            article.querySelector("h2") ||
+            article.querySelector("h3");
+          const label = heading ? heading.textContent.trim() : `Folie ${i + 1}`;
+          article.setAttribute("role", "group");
+          article.setAttribute("aria-roledescription", "Folie");
+          article.setAttribute("aria-label", `Folie ${i + 1}: ${label}`);
+          article.setAttribute("tabindex", "-1");
           slidesRoot.appendChild(article);
         });
         slides = Array.from(document.querySelectorAll(".slide"));
@@ -1212,7 +1280,9 @@
         index = nextSafe;
 
         slides.forEach((slide, i) => {
-          slide.setAttribute("aria-hidden", i !== index);
+          const isActive = i === index;
+          slide.setAttribute("aria-hidden", !isActive);
+          slide.setAttribute("tabindex", isActive ? "0" : "-1");
         });
 
         const percent = ((index + 1) / slides.length) * 100;
@@ -1220,7 +1290,12 @@
 
         dots.querySelectorAll("button").forEach((dot, i) => {
           dot.classList.toggle("active", i === index);
+          dot.setAttribute("aria-current", i === index ? "true" : "false");
         });
+
+        if (slideStatus) {
+          slideStatus.textContent = `Folie ${index + 1} von ${slides.length}`;
+        }
       };
 
       const buildDots = () => {
