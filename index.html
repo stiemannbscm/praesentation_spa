@@ -1,1334 +1,1092 @@
 <!doctype html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SPA: Präsentation als Single Page App</title>
-    <style>
-      :root {
-        --bg: #f4f6fb;
-        --bg-deep: #dde3ee;
-        --ink: #171a21;
-        --accent: #1f5eff;
-        --accent-2: #0aa5a4;
-        --accent-3: #f4b740;
-        --shadow: rgba(15, 20, 35, 0.18);
-        --glass: rgba(255, 255, 255, 0.72);
-        --glass-strong: rgba(255, 255, 255, 0.88);
-        --glass-border: rgba(255, 255, 255, 0.65);
-        --slide-radius: 34px;
-        --glow: rgba(31, 94, 255, 0.16);
-        --glow-2: rgba(10, 165, 164, 0.12);
-        --glow-3: rgba(244, 183, 64, 0.18);
-        --focus: #1f5eff;
-        --mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono",
-          monospace;
-        --display: "Fraunces", "Times New Roman", serif;
-        --ui: "Space Grotesk", "Trebuchet MS", "Segoe UI", sans-serif;
-      }
 
-      * {
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPA: Präsentation als Single Page App</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --bg-deep: #dde3ee;
+      --ink: #171a21;
+      --accent: #1f5eff;
+      --accent-2: #0aa5a4;
+      --accent-3: #f4b740;
+      --shadow: rgba(15, 20, 35, 0.18);
+      --glass: rgba(255, 255, 255, 0.72);
+      --glass-strong: rgba(255, 255, 255, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.65);
+      --slide-radius: 34px;
+      --glow: rgba(31, 94, 255, 0.16);
+      --glow-2: rgba(10, 165, 164, 0.12);
+      --glow-3: rgba(244, 183, 64, 0.18);
+      --focus: #1f5eff;
+      --mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono",
+        monospace;
+      --display: "Fraunces", "Times New Roman", serif;
+      --ui: "Space Grotesk", "Trebuchet MS", "Segoe UI", sans-serif;
+    }
 
-      .skip-link {
-        position: absolute;
-        left: 16px;
-        top: 16px;
-        padding: 10px 14px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.9);
-        color: #101018;
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        text-decoration: none;
-        transform: translateY(-200%);
-        transition: transform 0.2s ease;
-        z-index: 10;
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      .skip-link:focus {
-        transform: translateY(0);
-        outline: 3px solid var(--focus);
-        outline-offset: 3px;
-      }
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #101018;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transform: translateY(-200%);
+      transition: transform 0.2s ease;
+      z-index: 10;
+    }
 
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
-      }
+    .skip-link:focus {
+      transform: translateY(0);
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
 
-      body {
-        margin: 0;
-        font-family: var(--ui);
-        color: var(--ink);
-        background: radial-gradient(
-            circle at 12% 15%,
-            rgba(31, 94, 255, 0.12),
-            transparent 45%
-          ),
-          radial-gradient(
-            circle at 80% 20%,
-            rgba(10, 165, 164, 0.12),
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 50% 80%,
-            rgba(244, 183, 64, 0.12),
-            transparent 45%
-          ),
-          linear-gradient(135deg, var(--bg), var(--bg-deep));
-        min-height: 100vh;
-        overflow: hidden;
-      }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
 
-      main {
-        position: relative;
-        height: 100vh;
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-      }
+    body {
+      margin: 0;
+      font-family: var(--ui);
+      color: var(--ink);
+      background: radial-gradient(circle at 12% 15%,
+          rgba(31, 94, 255, 0.12),
+          transparent 45%),
+        radial-gradient(circle at 80% 20%,
+          rgba(10, 165, 164, 0.12),
+          transparent 40%),
+        radial-gradient(circle at 50% 80%,
+          rgba(244, 183, 64, 0.12),
+          transparent 45%),
+        linear-gradient(135deg, var(--bg), var(--bg-deep));
+      min-height: 100vh;
+      overflow: hidden;
+    }
 
-      main::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          120deg,
+    main {
+      position: relative;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg,
           rgba(255, 255, 255, 0.06),
           transparent 50%,
-          rgba(255, 255, 255, 0.04)
-        );
-        opacity: 0.6;
-        pointer-events: none;
-        animation: shimmer 12s linear infinite;
-      }
+          rgba(255, 255, 255, 0.04));
+      opacity: 0.6;
+      pointer-events: none;
+      animation: shimmer 12s linear infinite;
+    }
 
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 24px 48px 0 48px;
-        font-size: 0.95rem;
-      }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 48px 0 48px;
+      font-size: 0.95rem;
+    }
 
-      .brand {
-        font-family: var(--display);
-        font-size: 1.4rem;
-        letter-spacing: 0.04em;
-      }
+    .brand {
+      font-family: var(--display);
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+    }
 
-      .hint {
-        font-family: var(--mono);
-        color: rgba(23, 26, 33, 0.6);
-      }
+    .hint {
+      font-family: var(--mono);
+      color: rgba(23, 26, 33, 0.6);
+    }
 
-      .deck {
-        position: relative;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        padding: 28px 48px;
-      }
+    .deck {
+      position: relative;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 28px 48px;
+    }
 
-      .slides {
-        width: min(1100px, 92vw);
-        height: min(640px, 72vh);
-        position: relative;
-        overflow: hidden;
-        border-radius: calc(var(--slide-radius) + 8px);
-        border: 1px solid rgba(23, 26, 33, 0.08);
-        box-shadow: 0 30px 90px -60px var(--shadow);
-      }
+    .slides {
+      width: min(1200px, 94vw);
+      height: min(720px, 80vh);
+      position: relative;
+      overflow: hidden;
+      border-radius: calc(var(--slide-radius) + 8px);
+      border: 1px solid rgba(23, 26, 33, 0.08);
+      box-shadow: 0 30px 90px -60px var(--shadow);
+    }
 
-      .slides::before,
-      .slides::after {
-        content: "";
-        position: absolute;
-        border-radius: 999px;
-        filter: blur(14px);
-        opacity: 0.5;
-        z-index: 0;
-        animation: float 10s ease-in-out infinite;
-      }
+    .slides::before,
+    .slides::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(14px);
+      opacity: 0.5;
+      z-index: 0;
+      animation: float 10s ease-in-out infinite;
+    }
 
-      .slides::before {
-        width: 240px;
-        height: 240px;
-        background: linear-gradient(135deg, #b3c7ff, #f7e7b1);
-        top: -60px;
-        left: -80px;
-      }
+    .slides::before {
+      width: 240px;
+      height: 240px;
+      background: linear-gradient(135deg, #b3c7ff, #f7e7b1);
+      top: -60px;
+      left: -80px;
+    }
 
-      .slides::after {
-        width: 280px;
-        height: 280px;
-        background: linear-gradient(135deg, #bfe9e8, #d6e3ff);
-        bottom: -90px;
-        right: -100px;
-        animation-delay: -4s;
-      }
+    .slides::after {
+      width: 280px;
+      height: 280px;
+      background: linear-gradient(135deg, #bfe9e8, #d6e3ff);
+      bottom: -90px;
+      right: -100px;
+      animation-delay: -4s;
+    }
 
       .slide {
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-          140deg,
+      background: linear-gradient(140deg,
           rgba(255, 255, 255, 0.92),
-          rgba(255, 255, 255, 0.65)
-        );
-        border: 1px solid var(--glass-border);
-        border-radius: var(--slide-radius);
-        box-shadow: 0 26px 70px -50px var(--shadow);
-        backdrop-filter: blur(16px) saturate(120%);
-        padding: 48px 56px;
+          rgba(255, 255, 255, 0.65));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--slide-radius);
+      box-shadow: 0 26px 70px -50px var(--shadow);
+      backdrop-filter: blur(16px) saturate(120%);
+      padding: 48px 56px;
         display: grid;
         grid-template-columns: 1.2fr 0.8fr;
         gap: 32px;
+        font-size: 1.26rem;
         opacity: 0;
-        transform: translateX(6%) scale(0.98);
-        transition: opacity 0.6s ease, transform 0.6s ease;
-        z-index: 1;
+        transform: scale(0.98);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      z-index: 1;
+    }
+
+    .slide:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 6px;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1);
+      z-index: 2;
+      box-shadow: 0 30px 120px -60px var(--shadow),
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 0 50px -40px var(--glow);
+    }
+
+    .slide.outgoing {
+      opacity: 0;
+      transform: scale(0.98);
+      z-index: 1;
+    }
+
+    .slide.full {
+      grid-template-columns: 1fr;
+    }
+
+    .slide h1 {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 4vw, 3.8rem);
+      margin: 0 0 12px 0;
+      text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
+    }
+
+    .slide h2 {
+      font-family: var(--display);
+      font-size: clamp(2rem, 3.2vw, 3rem);
+      margin: 0 0 12px 0;
+      text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
+    }
+
+    .slide h3 {
+      font-size: 1rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin: 0 0 16px 0;
+      color: rgba(23, 26, 33, 0.6);
+    }
+
+    .slide p {
+      font-size: 1.08rem;
+      line-height: 1.6;
+      color: rgba(23, 26, 33, 0.85);
+    }
+
+    .slide ul {
+      padding-left: 18px;
+      margin: 16px 0 0 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .slide li {
+      line-height: 1.5;
+      color: rgba(23, 26, 33, 0.85);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(23, 26, 33, 0.12);
+    }
+
+    .intro {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      align-self: center;
+      justify-self: center;
+    }
+
+    .intro .tag-row {
+      justify-content: center;
+    }
+
+    .stat {
+      display: grid;
+      gap: 6px;
+      background: linear-gradient(140deg,
+          rgba(255, 255, 255, 0.96),
+          rgba(255, 255, 255, 0.7));
+      border: 1px solid rgba(23, 26, 33, 0.12);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: 0 18px 40px -28px var(--shadow);
+    }
+
+    .stat span {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: rgba(23, 26, 33, 0.65);
+    }
+
+    .stat strong {
+      font-size: 1.4rem;
+    }
+
+    .visual {
+      display: grid;
+      gap: 16px;
+      align-content: center;
+    }
+
+    .svg-frame {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(23, 26, 33, 0.12);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 20px 60px -36px var(--shadow),
+        0 0 40px -30px var(--glow-2);
+    }
+
+    .legend {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: rgba(23, 26, 33, 0.6);
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      padding: 0 48px 24px 48px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(23, 26, 33, 0.12);
+      overflow: hidden;
+      width: 220px;
+      border: 1px solid rgba(23, 26, 33, 0.12);
+    }
+
+    .progress>span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      width: 0%;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 16px var(--glow-2);
+    }
+
+    .nav {
+      width: 220px;
+      display: block;
+      margin-left: auto;
+    }
+
+    .progress.center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .agenda {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 18px;
+      margin-top: 12px;
+    }
+
+    .agenda div {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(23, 26, 33, 0.12);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+
+    .brand {
+      color: var(--ink);
+      text-shadow: 0 6px 16px rgba(15, 20, 35, 0.18);
+    }
+
+    .hint {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .deck::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(23, 26, 33, 0.06) 1px,
+          transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0) translateX(0);
       }
 
-      .slide:focus-visible {
-        outline: 3px solid var(--focus);
-        outline-offset: 6px;
+      50% {
+        transform: translateY(12px) translateX(8px);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-40%);
       }
 
-      .slide.active {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-        z-index: 2;
-        box-shadow: 0 30px 120px -60px var(--shadow),
-          0 0 0 1px rgba(255, 255, 255, 0.08),
-          0 0 50px -40px var(--glow);
+      100% {
+        transform: translateX(40%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+
+      header,
+      footer,
+      .deck {
+        padding-left: 20px;
+        padding-right: 20px;
       }
 
-      .slide.outgoing {
-        opacity: 0;
-        transform: translateX(-6%) scale(0.98);
-        z-index: 1;
+      .slides {
+        height: min(760px, 78vh);
       }
 
-      .slide.full {
+      .slide {
         grid-template-columns: 1fr;
       }
+    }
 
-      .slide h1 {
-        font-family: var(--display);
-        font-size: clamp(2.5rem, 4vw, 3.8rem);
-        margin: 0 0 12px 0;
-        text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
-      }
-
-      .slide h2 {
-        font-family: var(--display);
-        font-size: clamp(2rem, 3.2vw, 3rem);
-        margin: 0 0 12px 0;
-        text-shadow: 0 6px 18px rgba(15, 20, 35, 0.18);
-      }
-
-      .slide h3 {
-        font-size: 1rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        margin: 0 0 16px 0;
-        color: rgba(23, 26, 33, 0.6);
-      }
-
-      .slide p {
-        font-size: 1.08rem;
-        line-height: 1.6;
-        color: rgba(23, 26, 33, 0.85);
-      }
-
-      .slide ul {
-        padding-left: 18px;
-        margin: 16px 0 0 0;
-        display: grid;
-        gap: 10px;
-      }
-
-      .slide li {
-        line-height: 1.5;
-        color: rgba(23, 26, 33, 0.85);
-      }
-
-      .tag-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-      }
-
-      .tag {
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(23, 26, 33, 0.12);
-      }
-
-      .stat {
-        display: grid;
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
         gap: 6px;
-        background: linear-gradient(
-          140deg,
-          rgba(255, 255, 255, 0.96),
-          rgba(255, 255, 255, 0.7)
-        );
-        border: 1px solid rgba(23, 26, 33, 0.12);
-        border-radius: 18px;
-        padding: 18px 20px;
-        box-shadow: 0 18px 40px -28px var(--shadow);
       }
 
-      .stat span {
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        color: rgba(23, 26, 33, 0.65);
-      }
-
-      .stat strong {
-        font-size: 1.4rem;
-      }
-
-      .visual {
-        display: grid;
-        gap: 16px;
-        align-content: center;
-      }
-
-      .svg-frame {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(23, 26, 33, 0.12);
-        border-radius: 22px;
-        padding: 16px;
-        box-shadow: 0 20px 60px -36px var(--shadow),
-          0 0 40px -30px var(--glow-2);
-      }
-
-      .legend {
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        color: rgba(23, 26, 33, 0.6);
-      }
-
-      footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 48px 24px 48px;
-        font-family: var(--mono);
-        font-size: 0.85rem;
-      }
-
-      .progress {
-        height: 8px;
-        border-radius: 999px;
-        background: rgba(23, 26, 33, 0.12);
-        overflow: hidden;
-        width: 220px;
-        border: 1px solid rgba(23, 26, 33, 0.12);
-      }
-
-      .progress > span {
-        display: block;
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--accent-2));
-        width: 0%;
-        transition: width 0.4s ease;
-        box-shadow: 0 0 16px var(--glow-2);
-      }
-
-      .dots {
-        display: flex;
-        gap: 8px;
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(23, 26, 33, 0.25);
-        border: none;
-        cursor: pointer;
-      }
-
-      .dot.active {
-        background: var(--accent);
-        box-shadow: 0 0 10px var(--glow);
-      }
-
-      .nav {
-        display: flex;
-        gap: 10px;
-      }
-
-      .nav button {
-        border: none;
-        padding: 10px 16px;
-        border-radius: 999px;
-        font-family: var(--mono);
-        color: var(--ink);
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(23, 26, 33, 0.16);
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .nav button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px -18px var(--glow-2);
-      }
-
-      .nav button:focus-visible,
-      .dot:focus-visible {
-        outline: 3px solid var(--focus);
-        outline-offset: 3px;
+      .slide {
+        padding: 32px 28px;
       }
 
       .agenda {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px 18px;
-        margin-top: 12px;
+        grid-template-columns: 1fr;
       }
 
-      .agenda div {
-        background: rgba(255, 255, 255, 0.88);
-        border: 1px solid rgba(23, 26, 33, 0.12);
-        border-radius: 14px;
-        padding: 10px 12px;
-        font-size: 0.95rem;
+      footer {
+        flex-direction: column;
+        gap: 12px;
       }
+    }
+  </style>
+</head>
 
-      .brand {
-        color: var(--ink);
-        text-shadow: 0 6px 16px rgba(15, 20, 35, 0.18);
-      }
+<body>
+  <a class="skip-link" href="#slides">Direkt zu den Folien</a>
+  <main>
+    <header>
+      <div class="brand">Single Page Apps</div>
 
-      .hint {
-        color: rgba(255, 255, 255, 0.6);
-      }
+    </header>
 
-      .deck::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(
-          rgba(23, 26, 33, 0.06) 1px,
-          transparent 1px
-        );
-        background-size: 28px 28px;
-        opacity: 0.15;
-        pointer-events: none;
-      }
+    <section class="deck" aria-label="Präsentationsfolien">
+      <div class="slides" id="slides" tabindex="-1"></div>
+    </section>
 
-      @keyframes float {
-        0%,
-        100% {
-          transform: translateY(0) translateX(0);
-        }
-        50% {
-          transform: translateY(12px) translateX(8px);
-        }
-      }
+    <footer>
+      <div class="progress center" aria-hidden="true">
+        <span id="progress"></span>
+      </div>
+      <div class="nav" aria-hidden="true"></div>
+      <div class="sr-only" id="slide-status" aria-live="polite"></div>
+    </footer>
+  </main>
 
-      @keyframes shimmer {
-        0% {
-          transform: translateX(-40%);
-        }
-        100% {
-          transform: translateX(40%);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation: none !important;
-          transition: none !important;
-        }
-      }
-
-      @media (max-width: 900px) {
-        header,
-        footer,
-        .deck {
-          padding-left: 20px;
-          padding-right: 20px;
-        }
-
-        .slides {
-          height: min(720px, 74vh);
-        }
-
-        .slide {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 600px) {
-        header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
-        }
-
-        .slide {
-          padding: 32px 28px;
-        }
-
-        .agenda {
-          grid-template-columns: 1fr;
-        }
-
-        footer {
-          flex-direction: column;
-          gap: 12px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <a class="skip-link" href="#slides">Direkt zu den Folien</a>
-    <main>
-      <header>
-        <div class="brand">Single Page Apps</div>
-        <div class="hint">←/→ wechseln · Leertaste · 1–9 direkt</div>
-      </header>
-
-      <section class="deck" aria-label="Präsentationsfolien">
-        <div class="slides" id="slides" tabindex="-1"></div>
-      </section>
-
-      <footer>
-        <div class="progress" aria-hidden="true">
-          <span id="progress"></span>
+  <script>
+    const slidesData = [
+      {
+        full: true,
+        content: `
+      <div class="intro">
+        <h1>Single Page Applications</h1>
+        <h2>Hosting auf Vercel & Netlify</h2>
+        <div class="tag-row">
+          <div class="tag">Finn Beck</div>
+          <div class="tag">Ilia Sitouni</div>
+          <div class="tag">Sören Tiemann</div>
         </div>
-        <div class="dots" id="dots" aria-label="Folie auswählen"></div>
-        <div class="nav" aria-label="Foliensnavigation">
-          <button type="button" id="prev" aria-controls="slides">Zurück</button>
-          <button type="button" id="next" aria-controls="slides">Weiter</button>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Was ist eine SPA?</h3>
+        <h2>Definition</h2>
+        <ul>
+          <li><b>Definition:</b> Webanwendung, die aus <b>einer einzigen HTML-Seite</b> besteht.</li>
+          <li><b>Kernkonzept:</b> Inhalte werden <b>dynamisch nachgeladen</b> – kein kompletter „Page Reload“.</li>
+          <li><b>User Experience:</b> flüssig, <b>app-ähnlich</b> (Desktop/Mobile).</li>
+          <li><b>Abgrenzung:</b> <b>MPA</b> (Multi-Page) vs. <b>SPA</b> (Single-Page).</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Vergleich MPA vs SPA">
+            <rect width="320" height="220" rx="16" fill="#fefaf4" />
+
+            <!-- Left: MPA -->
+            <text x="36" y="30" font-size="12" font-family="sans-serif">MPA</text>
+            <rect x="24" y="40" width="120" height="34" rx="10" fill="#f2c14e"/>
+            <text x="48" y="62" font-size="10" font-family="sans-serif">/home.html</text>
+
+            <rect x="24" y="86" width="120" height="34" rx="10" fill="#f2c14e"/>
+            <text x="44" y="108" font-size="10" font-family="sans-serif">/products.html</text>
+
+            <rect x="24" y="132" width="120" height="34" rx="10" fill="#f2c14e"/>
+            <text x="42" y="154" font-size="10" font-family="sans-serif">/checkout.html</text>
+
+            <!-- reload arrows -->
+            <path d="M144 57 C165 57 165 103 144 103" stroke="#1c1a18" stroke-width="2" fill="none" />
+            <path d="M144 103 C165 103 165 149 144 149" stroke="#1c1a18" stroke-width="2" fill="none" />
+            <text x="28" y="196" font-size="10" font-family="sans-serif">Jeder Klick = Reload</text>
+
+            <!-- Right: SPA -->
+            <text x="202" y="30" font-size="12" font-family="sans-serif">SPA</text>
+            <rect x="176" y="40" width="120" height="48" rx="12" fill="#1b9aaa"/>
+            <text x="196" y="60" font-size="10" font-family="sans-serif" fill="#fff">index.html</text>
+            <text x="192" y="76" font-size="10" font-family="sans-serif" fill="#fff">+ app.js</text>
+
+            <rect x="176" y="104" width="120" height="34" rx="10" fill="#f24b29"/>
+            <text x="188" y="126" font-size="10" font-family="sans-serif" fill="#fff">API (JSON)</text>
+
+            <rect x="176" y="150" width="120" height="34" rx="10" fill="#f2c14e"/>
+            <text x="186" y="172" font-size="10" font-family="sans-serif">View Switch</text>
+
+            <!-- arrows SPA -->
+            <path d="M236 88 L236 104" stroke="#1c1a18" stroke-width="2" marker-end="url(#arr2)"/>
+            <path d="M236 138 L236 150" stroke="#1c1a18" stroke-width="2" marker-end="url(#arr2)"/>
+
+            <defs>
+              <marker id="arr2" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18"/>
+              </marker>
+            </defs>
+
+            <text x="182" y="196" font-size="10" font-family="sans-serif">Eine Seite, viele Views</text>
+          </svg>
         </div>
-        <div class="sr-only" id="slide-status" aria-live="polite"></div>
-      </footer>
-    </main>
 
-    <script>
-      const slidesData = [
-        {
-          full: true,
-          content: `
-            <div>
-              <h3>Präsentation als SPA</h3>
-              <h1>Single Page Applications</h1>
-              <p>
-                Eine SPA ist eine Web-App, die einmal lädt und anschließend wie
-                eine native Anwendung reagiert. Diese Präsentation ist selbst
-                eine SPA: Navigation, Animationen und Inhalte laufen in einem
-                einzigen Dokument.
-              </p>
-              <div class="tag-row">
-                <div class="tag">Dauer 10–15 Minuten</div>
-                <div class="tag">Interaktiv</div>
-                <div class="tag">Ohne Seitenreload</div>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Agenda</h3>
-              <h2>Was erwartet euch?</h2>
-              <div class="agenda">
-                <div>Historie & Meilensteine</div>
-                <div>Funktionsweise</div>
-                <div>Eingabe & Ausgabe</div>
-                <div>Anbieter & Ökosysteme</div>
-                <div>Anwendungsbereiche</div>
-                <div>Entwicklungswerkzeuge</div>
-                <div>Programmiersprachen</div>
-                <div>Vorteile & Nachteile</div>
-                <div>Trends & Best Practices</div>
-                <div>Q&A</div>
-              </div>
-            </div>
-            <div class="visual">
-              <div class="stat">
-                <span>Interaktionsmodell</span>
-                <strong>State getrieben</strong>
-              </div>
-              <div class="stat">
-                <span>Rendering</span>
-                <strong>Client + API</strong>
-              </div>
-              <div class="stat">
-                <span>Navigation</span>
-                <strong>Routing ohne Reload</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Historie</h3>
-              <h2>Vom Dokument zur App</h2>
-              <ul>
-                <li>
-                  2004–2005: Gmail & Google Maps zeigen, dass Web-Apps ohne
-                  Seitenreload möglich sind.
-                </li>
-                <li>
-                  AJAX bringt asynchrones Nachladen; später folgen Fetch, Web
-                  Storage und Service Worker.
-                </li>
-                <li>
-                  2010+: Frameworks wie AngularJS, React und Vue strukturieren
-                  Komponenten und State-Management.
-                </li>
-                <li>
-                  Heute: SPAs sind Standard für Dashboards, SaaS und komplexe
-                  Workflows.
-                </li>
-              </ul>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Zeitachse zur SPA-Entwicklung"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <path
-                    d="M30 150 L120 90 L210 120 L290 60"
-                    fill="none"
-                    stroke="#1b9aaa"
-                    stroke-width="6"
-                  />
-                  <circle cx="30" cy="150" r="10" fill="#f24b29" />
-                  <circle cx="120" cy="90" r="10" fill="#f24b29" />
-                  <circle cx="210" cy="120" r="10" fill="#f24b29" />
-                  <circle cx="290" cy="60" r="10" fill="#f24b29" />
-                  <text x="18" y="180" font-size="12" font-family="sans-serif">
-                    2004
-                  </text>
-                  <text x="102" y="70" font-size="12" font-family="sans-serif">
-                    2010
-                  </text>
-                  <text x="188" y="150" font-size="12" font-family="sans-serif">
-                    2015
-                  </text>
-                  <text x="268" y="40" font-size="12" font-family="sans-serif">
-                    2024
-                  </text>
-                </svg>
-              </div>
-              <div class="legend">
-                Von HTML-Dokumenten hin zu komplexen SPA-Ökosystemen.
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Funktionsweise</h3>
-              <h2>Einmal laden, dann reagieren</h2>
-              <ul>
-                <li>
-                  Der Browser lädt eine initiale HTML-Shell, CSS und JavaScript.
-                </li>
-                <li>
-                  Ein Router wechselt Views lokal, ohne neue Dokumente zu laden.
-                </li>
-                <li>
-                  Daten fließen per API (REST, GraphQL), der UI-State steuert die
-                  Darstellung.
-                </li>
-                <li>
-                  Komponenten werden deklarativ gerendert und wiederverwendet.
-                </li>
-              </ul>
-              <div class="tag-row">
-                <div class="tag">Client Rendering</div>
-                <div class="tag">State Store</div>
-                <div class="tag">API Gateway</div>
-              </div>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Diagramm mit Browser, Router und API"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="30" y="40" width="120" height="70" rx="12" fill="#f2c14e" />
-                  <text x="52" y="82" font-size="12" font-family="sans-serif">
-                    Browser
-                  </text>
-                  <rect x="30" y="130" width="120" height="60" rx="12" fill="#1b9aaa" />
-                  <text x="60" y="165" font-size="12" font-family="sans-serif" fill="#fff">
-                    Router
-                  </text>
-                  <rect x="200" y="80" width="90" height="70" rx="12" fill="#f24b29" />
-                  <text x="222" y="122" font-size="12" font-family="sans-serif" fill="#fff">
-                    API
-                  </text>
-                  <path
-                    d="M150 75 L200 115"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow)"
-                    fill="none"
-                  />
-                  <path
-                    d="M150 150 L200 115"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow)"
-                    fill="none"
-                  />
-                  <defs>
-                    <marker
-                      id="arrow"
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="6"
-                      refY="3"
-                      orient="auto"
-                    >
-                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
-                    </marker>
-                  </defs>
-                </svg>
-              </div>
-              <div class="legend">UI reagiert auf State, nicht auf Seitenreload.</div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Eingabe & Ausgabe</h3>
-              <h2>Interaktion in Echtzeit</h2>
-              <ul>
-                <li>
-                  Eingaben: Formulare, Drag & Drop, Touch, Tastaturkürzel,
-                  Sprachinput.
-                </li>
-                <li>
-                  Ausgabe: dynamische Komponenten, Live-Validierung, Charts,
-                  Toasts, Echtzeit-Updates.
-                </li>
-                <li>
-                  Offline-First möglich durch Service Worker und lokale Caches.
-                </li>
-                <li>
-                  Barrierefreiheit erfordert Fokus-Management und ARIA-Labels.
-                </li>
-              </ul>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Eingabe und Ausgabe im SPA-Flow"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="30" y="40" width="110" height="60" rx="12" fill="#1b9aaa" />
-                  <text x="52" y="74" font-size="12" font-family="sans-serif" fill="#fff">
-                    Input
-                  </text>
-                  <rect x="180" y="40" width="110" height="60" rx="12" fill="#f24b29" />
-                  <text x="198" y="74" font-size="12" font-family="sans-serif" fill="#fff">
-                    UI
-                  </text>
-                  <rect x="105" y="130" width="110" height="60" rx="12" fill="#f2c14e" />
-                  <text x="120" y="165" font-size="12" font-family="sans-serif">
-                    Output
-                  </text>
-                  <path
-                    d="M140 70 L180 70"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-io)"
-                  />
-                  <path
-                    d="M220 100 L170 130"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-io)"
-                  />
-                  <path
-                    d="M100 100 L150 130"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-io)"
-                  />
-                  <defs>
-                    <marker
-                      id="arrow-io"
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="6"
-                      refY="3"
-                      orient="auto"
-                    >
-                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
-                    </marker>
-                  </defs>
-                </svg>
-              </div>
-              <div class="stat">
-                <span>Reaktionszeit</span>
-                <strong>~16 ms pro Frame</strong>
-              </div>
-              <div class="stat">
-                <span>Input-Kanäle</span>
-                <strong>Touch · Maus · Voice</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Anbieter</h3>
-              <h2>Frameworks & Plattformen</h2>
-              <ul>
-                <li>React, Vue, Angular: dominieren Corporate SPAs.</li>
-                <li>
-                  Svelte, Solid, Qwik: Fokus auf Performance und kleinere
-                  Bundles.
-                </li>
-                <li>
-                  Plattformen: Vercel, Netlify, Firebase für Hosting, CI/CD und
-                  Auth.
-                </li>
-                <li>
-                  Headless APIs: Contentful, Sanity, Strapi für Inhalte.
-                </li>
-              </ul>
-              <div class="tag-row">
-                <div class="tag">Ökosysteme</div>
-                <div class="tag">Hosting</div>
-                <div class="tag">Headless CMS</div>
-              </div>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Netzwerk aus Framework-Logos"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <circle cx="160" cy="110" r="36" fill="#f24b29" />
-                  <text x="138" y="116" font-size="12" font-family="sans-serif" fill="#fff">
-                    SPA
-                  </text>
-                  <circle cx="70" cy="60" r="24" fill="#1b9aaa" />
-                  <circle cx="250" cy="60" r="24" fill="#1b9aaa" />
-                  <circle cx="70" cy="170" r="24" fill="#1b9aaa" />
-                  <circle cx="250" cy="170" r="24" fill="#1b9aaa" />
-                  <path
-                    d="M95 65 L135 95"
-                    stroke="#1c1a18"
-                    stroke-width="2"
-                  />
-                  <path
-                    d="M225 65 L185 95"
-                    stroke="#1c1a18"
-                    stroke-width="2"
-                  />
-                  <path
-                    d="M95 170 L135 125"
-                    stroke="#1c1a18"
-                    stroke-width="2"
-                  />
-                  <path
-                    d="M225 170 L185 125"
-                    stroke="#1c1a18"
-                    stroke-width="2"
-                  />
-                </svg>
-              </div>
-              <div class="legend">Frameworks bilden den Kern, Plattformen liefern Infrastruktur.</div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Anwendungsbereiche</h3>
-              <h2>Wo SPAs glänzen</h2>
-              <ul>
-                <li>Produktivitätstools: CRM, Analytics, Projektmanagement.</li>
-                <li>Finanzen & E-Commerce: Dashboards, Checkout-Flows.</li>
-                <li>Medien: Streaming, interaktive Storytelling-Seiten.</li>
-                <li>IoT & Industriepanele: Echtzeit-Monitoring.</li>
-              </ul>
-              <p>
-                SPAs sind stark, wenn Nutzer viel navigieren und Daten in kurzen
-                Intervallen aktualisiert werden.
-              </p>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Beispiele für SPA-Anwendungen"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="24" y="30" width="120" height="70" rx="12" fill="#f2c14e" />
-                  <text x="40" y="68" font-size="12" font-family="sans-serif">
-                    Dashboard
-                  </text>
-                  <rect x="176" y="30" width="120" height="70" rx="12" fill="#1b9aaa" />
-                  <text x="196" y="68" font-size="12" font-family="sans-serif" fill="#fff">
-                    Commerce
-                  </text>
-                  <rect x="24" y="120" width="120" height="70" rx="12" fill="#f24b29" />
-                  <text x="46" y="158" font-size="12" font-family="sans-serif" fill="#fff">
-                    Media
-                  </text>
-                  <rect x="176" y="120" width="120" height="70" rx="12" fill="#1c1a18" />
-                  <text x="200" y="158" font-size="12" font-family="sans-serif" fill="#fff">
-                    IoT
-                  </text>
-                </svg>
-              </div>
-              <div class="stat">
-                <span>Interaktionsdichte</span>
-                <strong>Sehr hoch</strong>
-              </div>
-              <div class="stat">
-                <span>Beispiele</span>
-                <strong>Notion · Figma · Jira</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Entwicklungswerkzeuge</h3>
-              <h2>Toolkit für SPAs</h2>
-              <ul>
-                <li>
-                  Bundler: Vite, Webpack, Parcel für Assets und Hot Reload.
-                </li>
-                <li>
-                  State: Redux, Zustand, Pinia oder Signals.
-                </li>
-                <li>
-                  Testing: Playwright/Cypress für E2E, Vitest/Jest für Unit.
-                </li>
-                <li>
-                  Observability: LogRocket, Sentry, Datadog für Monitoring.
-                </li>
-              </ul>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Werkzeugkasten"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="60" y="70" width="200" height="90" rx="16" fill="#f2c14e" />
-                  <rect x="90" y="50" width="140" height="30" rx="12" fill="#1b9aaa" />
-                  <circle cx="110" cy="115" r="12" fill="#f24b29" />
-                  <circle cx="160" cy="115" r="12" fill="#f24b29" />
-                  <circle cx="210" cy="115" r="12" fill="#f24b29" />
-                </svg>
-              </div>
-              <div class="legend">Toolchain entscheidet über Geschwindigkeit und Stabilität.</div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Programmiersprachen</h3>
-              <h2>Sprachen & Paradigmen</h2>
-              <ul>
-                <li>JavaScript/TypeScript sind Standard für SPA-Logik.</li>
-                <li>
-                  HTML/CSS definieren Struktur und Layout, oft ergänzt durch
-                  CSS-in-JS oder Utility-Frameworks.
-                </li>
-                <li>
-                  WASM erlaubt Performance-Module in Rust, Go oder C++.
-                </li>
-                <li>
-                  Backend-Sprachen liefern APIs: Node.js, Python, Java, .NET.
-                </li>
-              </ul>
-              <div class="tag-row">
-                <div class="tag">Type Safety</div>
-                <div class="tag">Component Driven</div>
-                <div class="tag">API First</div>
-              </div>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Sprachen im SPA-Stack"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <circle cx="90" cy="100" r="38" fill="#f24b29" />
-                  <text x="70" y="106" font-size="12" font-family="sans-serif" fill="#fff">
-                    JS/TS
-                  </text>
-                  <circle cx="230" cy="100" r="38" fill="#1b9aaa" />
-                  <text x="210" y="106" font-size="12" font-family="sans-serif" fill="#fff">
-                    WASM
-                  </text>
-                  <rect x="110" y="150" width="100" height="40" rx="12" fill="#f2c14e" />
-                  <text x="130" y="175" font-size="12" font-family="sans-serif">
-                    API
-                  </text>
-                  <path
-                    d="M120 120 L150 150"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-lang)"
-                  />
-                  <path
-                    d="M200 120 L170 150"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-lang)"
-                  />
-                  <defs>
-                    <marker
-                      id="arrow-lang"
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="6"
-                      refY="3"
-                      orient="auto"
-                    >
-                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
-                    </marker>
-                  </defs>
-                </svg>
-              </div>
-              <div class="stat">
-                <span>Dominanz</span>
-                <strong>TypeScript wächst</strong>
-              </div>
-              <div class="stat">
-                <span>Interoperabilität</span>
-                <strong>REST · GraphQL · gRPC</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Vorteile</h3>
-              <h2>Warum Teams SPAs lieben</h2>
-              <ul>
-                <li>Sehr schnelle Navigation nach dem ersten Laden.</li>
-                <li>App-ähnliche UX, reiche Interaktionen.</li>
-                <li>Wiederverwendbare Komponenten, klare UI-Architektur.</li>
-                <li>Offline- und PWA-Fähigkeiten möglich.</li>
-              </ul>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Schnelligkeit und Nutzererlebnis"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <path
-                    d="M60 150 A100 100 0 0 1 260 150"
-                    fill="none"
-                    stroke="#1c1a18"
-                    stroke-width="8"
-                  />
-                  <line x1="160" y1="150" x2="220" y2="110" stroke="#f24b29" stroke-width="6" />
-                  <circle cx="160" cy="150" r="10" fill="#1b9aaa" />
-                  <text x="120" y="190" font-size="12" font-family="sans-serif">
-                    Speed
-                  </text>
-                </svg>
-              </div>
-              <div class="stat">
-                <span>User Experience</span>
-                <strong>Gefühl wie native App</strong>
-              </div>
-              <div class="stat">
-                <span>Wartbarkeit</span>
-                <strong>Komponenten & Design-Systeme</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Nachteile</h3>
-              <h2>Worauf man achten muss</h2>
-              <ul>
-                <li>
-                  Größerer Initial-Download, damit langsamerer First Paint.
-                </li>
-                <li>SEO ist komplexer ohne Server Rendering.</li>
-                <li>State-Management und Datenkonsistenz werden anspruchsvoll.</li>
-                <li>Browser-Kompatibilität und Memory-Leaks müssen überwacht werden.</li>
-              </ul>
-              <p>
-                Moderne Strategien wie SSR/SSG, Code Splitting und Islands
-                reduzieren diese Risiken.
-              </p>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Balance zwischen Vor- und Nachteilen"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="60" y="140" width="200" height="16" fill="#1c1a18" />
-                  <circle cx="120" cy="120" r="18" fill="#f24b29" />
-                  <circle cx="200" cy="100" r="18" fill="#1b9aaa" />
-                  <line x1="80" y1="140" x2="240" y2="140" stroke="#1c1a18" stroke-width="4" />
-                </svg>
-              </div>
-              <div class="legend">Balance zwischen Nutzererlebnis und Komplexität.</div>
-            </div>
-          `,
-        },
-        {
-          content: `
-            <div>
-              <h3>Trends</h3>
-              <h2>Wohin entwickelt sich die SPA?</h2>
-              <ul>
-                <li>
-                  Hybrid-Rendering: SSR, Streaming und Islands für schnellere
-                  Starts.
-                </li>
-                <li>
-                  Edge Computing: Logik näher am Nutzer, z.B. CDN Functions.
-                </li>
-                <li>
-                  Design Systems: konsistente UI, effiziente Skalierung.
-                </li>
-                <li>
-                  AI-gestützte Interfaces: personalisierte Workflows, Chat-UX.
-                </li>
-              </ul>
-              <div class="tag-row">
-                <div class="tag">Islands</div>
-                <div class="tag">Edge</div>
-                <div class="tag">Streaming</div>
-              </div>
-            </div>
-            <div class="visual">
-              <div class="svg-frame">
-                <svg
-                  viewBox="0 0 320 220"
-                  role="img"
-                  aria-label="Trends: Islands, Edge, AI"
-                >
-                  <rect width="320" height="220" rx="16" fill="#fefaf4" />
-                  <rect x="30" y="40" width="80" height="50" rx="12" fill="#f2c14e" />
-                  <text x="42" y="70" font-size="12" font-family="sans-serif">
-                    Islands
-                  </text>
-                  <rect x="210" y="40" width="80" height="50" rx="12" fill="#1b9aaa" />
-                  <text x="232" y="70" font-size="12" font-family="sans-serif" fill="#fff">
-                    Edge
-                  </text>
-                  <rect x="120" y="120" width="80" height="50" rx="12" fill="#f24b29" />
-                  <text x="144" y="150" font-size="12" font-family="sans-serif" fill="#fff">
-                    AI
-                  </text>
-                  <path
-                    d="M110 80 L160 120"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-trend)"
-                  />
-                  <path
-                    d="M250 80 L200 120"
-                    stroke="#1c1a18"
-                    stroke-width="3"
-                    marker-end="url(#arrow-trend)"
-                  />
-                  <defs>
-                    <marker
-                      id="arrow-trend"
-                      markerWidth="10"
-                      markerHeight="10"
-                      refX="6"
-                      refY="3"
-                      orient="auto"
-                    >
-                      <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18" />
-                    </marker>
-                  </defs>
-                </svg>
-              </div>
-              <div class="stat">
-                <span>Ziel</span>
-                <strong>Faster by Design</strong>
-              </div>
-              <div class="stat">
-                <span>UX-Anspruch</span>
-                <strong>Personalisierung</strong>
-              </div>
-            </div>
-          `,
-        },
-        {
-          full: true,
-          content: `
-            <div>
-              <h3>Wrap-up</h3>
-              <h2>Essenz in drei Sätzen</h2>
-              <p>
-                SPAs liefern App-ähnliche Erlebnisse im Browser, wenn Interaktion
-                und Reaktionsgeschwindigkeit zählen. Sie benötigen aber ein
-                solides Architektur-Setup für Performance, SEO und State. Das
-                Ökosystem entwickelt sich Richtung Hybrid-Ansätze, die das Beste
-                aus SPA und SSR kombinieren.
-              </p>
-              <div class="tag-row">
-                <div class="tag">Fragen?</div>
-                <div class="tag">Danke!</div>
-                <div class="tag">Let’s build</div>
-              </div>
-            </div>
-          `,
-        },
-      ];
+        <div class="stat">
+          <span>Unterschied</span>
+          <strong>Reload vs. View-Wechsel</strong>
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Historie & Evolution</h3>
+        <h2>Wie SPAs entstanden</h2>
+        <ul>
+          <li><b>Web 1.0:</b> Statisches HTML, jeder Klick = Serveranfrage.</li>
+          <li><b>AJAX-Revolution (~2005):</b> Gmail & Google Maps → Nachladen ohne Refresh.</li>
+          <li><b>jQuery-Ära:</b> Vereinfachte DOM-Manipulationen & Requests.</li>
+          <li><b>Framework-Boom (ab 2010):</b> AngularJS, Backbone.js → Struktur für Frontend-Code.</li>
+          <li><b>Heute:</b> React, Vue, Svelte + „The Edge“ (Vercel/Netlify).</li>
+        </ul>
+      </div>
 
-      const slidesRoot = document.getElementById("slides");
-      const dots = document.getElementById("dots");
-      const progress = document.getElementById("progress");
-      const prev = document.getElementById("prev");
-      const next = document.getElementById("next");
-      const slideStatus = document.getElementById("slide-status");
-      let slides = [];
-      let index = 0;
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Zeitachse SPA Evolution">
+            <rect width="320" height="220" rx="16" fill="#fefaf4" />
 
-      const renderSlides = () => {
-        slidesRoot.innerHTML = "";
-        slidesData.forEach((slide, i) => {
-          const article = document.createElement("article");
-          article.className = "slide";
-          if (slide.full) article.classList.add("full");
-          article.innerHTML = slide.content.trim();
-          const heading =
-            article.querySelector("h1") ||
-            article.querySelector("h2") ||
-            article.querySelector("h3");
-          const label = heading ? heading.textContent.trim() : `Folie ${i + 1}`;
-          article.setAttribute("role", "group");
-          article.setAttribute("aria-roledescription", "Folie");
-          article.setAttribute("aria-label", `Folie ${i + 1}: ${label}`);
-          article.setAttribute("tabindex", "-1");
-          slidesRoot.appendChild(article);
-        });
-        slides = Array.from(document.querySelectorAll(".slide"));
-      };
+            <!-- baseline -->
+            <line x1="30" y1="150" x2="290" y2="150" stroke="#1c1a18" stroke-width="3"/>
 
-      const updateSlides = (nextIndex) => {
-        const nextSafe = (nextIndex + slides.length) % slides.length;
-        const current = slides[index];
-        const nextSlide = slides[nextSafe];
+            <!-- ticks + points -->
+            <line x1="45" y1="140" x2="45" y2="160" stroke="#1c1a18" stroke-width="2"/>
+            <circle cx="45" cy="150" r="7" fill="#f24b29"/>
+            <text x="32" y="178" font-size="10" font-family="sans-serif">Web 1.0</text>
 
-        if (current === nextSlide) {
-          current.classList.add("active");
-          current.classList.remove("outgoing");
-        } else {
-          current.classList.remove("active");
-          current.classList.add("outgoing");
-          nextSlide.classList.remove("outgoing");
-          nextSlide.classList.add("active");
-        }
+            <line x1="105" y1="140" x2="105" y2="160" stroke="#1c1a18" stroke-width="2"/>
+            <circle cx="105" cy="150" r="7" fill="#f24b29"/>
+            <text x="94" y="178" font-size="10" font-family="sans-serif">~2005</text>
+            <text x="82" y="38" font-size="10" font-family="sans-serif">AJAX</text>
+            <rect x="78" y="44" width="54" height="22" rx="8" fill="#f2c14e"/>
+            <text x="87" y="60" font-size="9" font-family="sans-serif">Gmail</text>
 
-        index = nextSafe;
+            <line x1="160" y1="140" x2="160" y2="160" stroke="#1c1a18" stroke-width="2"/>
+            <circle cx="160" cy="150" r="7" fill="#f24b29"/>
+            <text x="148" y="178" font-size="10" font-family="sans-serif">jQuery</text>
 
-        slides.forEach((slide, i) => {
-          const isActive = i === index;
-          slide.setAttribute("aria-hidden", !isActive);
-          slide.setAttribute("tabindex", isActive ? "0" : "-1");
-        });
+            <line x1="215" y1="140" x2="215" y2="160" stroke="#1c1a18" stroke-width="2"/>
+            <circle cx="215" cy="150" r="7" fill="#f24b29"/>
+            <text x="190" y="116" font-size="10" font-family="sans-serif">Frameworks</text>
+            <rect x="187" y="122" width="86" height="22" rx="8" fill="#1b9aaa"/>
+            <text x="198" y="137" font-size="9" font-family="sans-serif" fill="#fff">AngularJS</text>
 
-        const percent = ((index + 1) / slides.length) * 100;
-        progress.style.width = `${percent}%`;
+            <line x1="275" y1="140" x2="275" y2="160" stroke="#1c1a18" stroke-width="2"/>
+            <circle cx="275" cy="150" r="7" fill="#f24b29"/>
+            <text x="252" y="178" font-size="10" font-family="sans-serif">Heute</text>
 
-        dots.querySelectorAll("button").forEach((dot, i) => {
-          dot.classList.toggle("active", i === index);
-          dot.setAttribute("aria-current", i === index ? "true" : "false");
-        });
+            <!-- edge bubble -->
+            <rect x="228" y="56" width="78" height="22" rx="8" fill="#f24b29"/>
+            <text x="240" y="71" font-size="9" font-family="sans-serif" fill="#fff">Edge/CDN</text>
 
-        if (slideStatus) {
-          slideStatus.textContent = `Folie ${index + 1} von ${slides.length}`;
-        }
-      };
+            <!-- connector lines -->
+            <path d="M105 144 L105 72" stroke="#1c1a18" stroke-width="2" fill="none"/>
+            <path d="M215 144 L215 146" stroke="#1c1a18" stroke-width="2" fill="none"/>
+            <path d="M275 144 L267 78" stroke="#1c1a18" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+        <div class="legend">
+          Meilensteine: AJAX → jQuery → Frameworks → Edge-Deployment.
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Funktionsweise</h3>
+        <h2>Was passiert technisch?</h2>
+        <ul>
+          <li><b>Initial Load:</b> Browser lädt <b>index.html</b> + großes <b>JS-Bundle</b>.</li>
+          <li><b>CSR:</b> JavaScript baut das HTML im Browser auf.</li>
+          <li><b>Datenfluss:</b> Kommunikation via APIs (<b>REST</b> / <b>GraphQL</b>).</li>
+          <li><b>Format:</b> Austausch von Rohdaten (meist <b>JSON</b>), kein HTML.</li>
+          <li><b>Routing:</b> URL-Änderungen werden abgefangen (History API).</li>
+        </ul>
+      </div>
 
-      const buildDots = () => {
-        dots.innerHTML = "";
-        slides.forEach((_, i) => {
-          const dot = document.createElement("button");
-          dot.className = "dot";
-          dot.type = "button";
-          dot.setAttribute("aria-label", `Folie ${i + 1}`);
-          dot.addEventListener("click", () => updateSlides(i));
-          dots.appendChild(dot);
-        });
-      };
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="SPA Request und Render Flow">
+            <rect width="320" height="220" rx="16" fill="#fefaf4" />
 
-      const handleKey = (event) => {
-        if (event.key === "ArrowRight" || event.key === " ") {
-          updateSlides(index + 1);
-        }
-        if (event.key === "ArrowLeft") {
-          updateSlides(index - 1);
-        }
-        if (event.key >= "1" && event.key <= "9") {
-          const jump = Number(event.key) - 1;
-          if (jump < slides.length) updateSlides(jump);
-        }
-      };
+            <rect x="18" y="30" width="120" height="38" rx="12" fill="#f2c14e"/>
+            <text x="48" y="54" font-size="10" font-family="sans-serif">Browser</text>
 
-      renderSlides();
-      buildDots();
-      updateSlides(0);
-      prev.addEventListener("click", () => updateSlides(index - 1));
-      next.addEventListener("click", () => updateSlides(index + 1));
-      document.addEventListener("keydown", handleKey);
-    </script>
-  </body>
+            <rect x="182" y="30" width="120" height="38" rx="12" fill="#1c1a18"/>
+            <text x="215" y="54" font-size="10" font-family="sans-serif" fill="#fff">CDN</text>
+
+            <rect x="182" y="82" width="120" height="38" rx="12" fill="#1b9aaa"/>
+            <text x="196" y="106" font-size="10" font-family="sans-serif" fill="#fff">JS Bundle</text>
+
+            <rect x="18" y="82" width="120" height="38" rx="12" fill="#1b9aaa"/>
+            <text x="48" y="106" font-size="10" font-family="sans-serif" fill="#fff">Router</text>
+
+            <rect x="182" y="134" width="120" height="38" rx="12" fill="#f24b29"/>
+            <text x="212" y="158" font-size="10" font-family="sans-serif" fill="#fff">API (JSON)</text>
+
+            <rect x="18" y="134" width="120" height="38" rx="12" fill="#f2c14e"/>
+            <text x="44" y="158" font-size="10" font-family="sans-serif">Render UI</text>
+
+            <path d="M138 49 L182 49" stroke="#1c1a18" stroke-width="3" marker-end="url(#a4)"/>
+            <path d="M242 68 L242 82" stroke="#1c1a18" stroke-width="3" marker-end="url(#a4)"/>
+            <path d="M182 101 L138 101" stroke="#1c1a18" stroke-width="3" marker-end="url(#a4)"/>
+            <path d="M78 120 L78 134" stroke="#1c1a18" stroke-width="3" marker-end="url(#a4)"/>
+            <path d="M138 153 L182 153" stroke="#1c1a18" stroke-width="3" marker-end="url(#a4)"/>
+            <path d="M242 172 L242 186" stroke="#1c1a18" stroke-width="0"/>
+            <path d="M182 153 L138 153" stroke="#1c1a18" stroke-width="0"/>
+
+            <defs>
+              <marker id="a4" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <div class="legend">
+          Server liefert primär Assets + JSON – UI entsteht im Browser.
+        </div>
+      </div>
+    `,
+      },
+
+      {
+        content: `
+      <div>
+        <h3>Hosting & Anbieter</h3>
+        <h2>Vercel / Netlify</h2>
+        <ul>
+          <li><b>Früher:</b> Server-Setup (Apache/Nginx), FTP-Deploy, viel Handarbeit.</li>
+          <li><b>Git-Integration:</b> Push zu GitHub = automatisches Deployment.</li>
+          <li><b>CDN / Edge Network:</b> Assets liegen nah beim Nutzer → geringe Latenz.</li>
+          <li><b>Serverless Functions:</b> Backend-Logik ohne eigenen Server.</li>
+          <li><b>Optimiert für Frontend:</b> Next.js, Nuxt, React, Vue (Build-Presets).</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Deployment Pipeline Vercel Netlify">
+            <rect width="320" height="220" rx="16" fill="#fefaf4" />
+
+            <rect x="20" y="34" width="85" height="40" rx="12" fill="#1c1a18"/>
+            <text x="45" y="58" font-size="10" font-family="sans-serif" fill="#fff">Git</text>
+
+            <rect x="118" y="34" width="85" height="40" rx="12" fill="#f2c14e"/>
+            <text x="140" y="58" font-size="10" font-family="sans-serif">Build</text>
+
+            <rect x="216" y="26" width="84" height="56" rx="12" fill="#1b9aaa"/>
+            <text x="236" y="54" font-size="10" font-family="sans-serif" fill="#fff">CDN</text>
+            <text x="232" y="70" font-size="9" font-family="sans-serif" fill="#fff">Edge</text>
+
+            <rect x="216" y="110" width="84" height="56" rx="12" fill="#f24b29"/>
+            <text x="228" y="140" font-size="10" font-family="sans-serif" fill="#fff">Functions</text>
+            <text x="232" y="156" font-size="9" font-family="sans-serif" fill="#fff">API</text>
+
+            <rect x="20" y="130" width="183" height="36" rx="12" fill="#f2c14e"/>
+            <text x="34" y="153" font-size="10" font-family="sans-serif">Preview Deployments</text>
+
+            <path d="M105 54 L118 54" stroke="#1c1a18" stroke-width="3" marker-end="url(#a5)"/>
+            <path d="M203 54 L216 54" stroke="#1c1a18" stroke-width="3" marker-end="url(#a5)"/>
+            <path d="M160 74 L160 130" stroke="#1c1a18" stroke-width="3" marker-end="url(#a5)"/>
+            <path d="M203 148 L216 138" stroke="#1c1a18" stroke-width="3" marker-end="url(#a5)"/>
+
+            <defs>
+              <marker id="a5" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="stat">
+          <span>Stärke</span>
+          <strong>Automatisiert</strong>
+        </div>
+        <div class="stat">
+          <span>Performance</span>
+          <strong>Global</strong>
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Eingabe- & Ausgabemöglichkeiten</h3>
+        <h2>Inputs & Outputs in SPAs</h2>
+        <ul>
+          <li><b>Eingabe:</b> Formulare, Maus, Tastatur.</li>
+          <li><b>Modern:</b> Touch-Gesten, Drag & Drop.</li>
+          <li><b>Web APIs:</b> Geolocation, Kamera, Mikrofon, Gyroskop.</li>
+          <li><b>Ausgabe:</b> DOM-Updates, Canvas/WebGL, Audio/Video.</li>
+          <li><b>Storage:</b> Local Storage / IndexedDB.</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Inputs Outputs Browser APIs">
+            <rect width="320" height="220" rx="16" fill="#fefaf4" />
+
+            <!-- Input column -->
+            <text x="34" y="30" font-size="12" font-family="sans-serif">Input</text>
+            <rect x="24" y="42" width="120" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="48" y="64" font-size="10" font-family="sans-serif" fill="#fff">Form / Keyboard</text>
+            <rect x="24" y="82" width="120" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="56" y="104" font-size="10" font-family="sans-serif" fill="#fff">Touch / DnD</text>
+            <rect x="24" y="122" width="120" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="52" y="144" font-size="10" font-family="sans-serif" fill="#fff">Camera / Mic</text>
+
+            <!-- Output column -->
+            <text x="206" y="30" font-size="12" font-family="sans-serif">Output</text>
+            <rect x="176" y="42" width="120" height="34" rx="12" fill="#f24b29"/>
+            <text x="214" y="64" font-size="10" font-family="sans-serif" fill="#fff">DOM Update</text>
+            <rect x="176" y="82" width="120" height="34" rx="12" fill="#f24b29"/>
+            <text x="206" y="104" font-size="10" font-family="sans-serif" fill="#fff">Canvas/WebGL</text>
+            <rect x="176" y="122" width="120" height="34" rx="12" fill="#f24b29"/>
+            <text x="214" y="144" font-size="10" font-family="sans-serif" fill="#fff">Audio/Video</text>
+
+            <!-- Storage bar -->
+            <rect x="24" y="170" width="272" height="32" rx="12" fill="#f2c14e"/>
+            <text x="62" y="191" font-size="10" font-family="sans-serif">Local Storage / IndexedDB</text>
+
+            <!-- arrows -->
+            <path d="M144 59 L176 59" stroke="#1c1a18" stroke-width="2" marker-end="url(#a6)"/>
+            <path d="M144 99 L176 99" stroke="#1c1a18" stroke-width="2" marker-end="url(#a6)"/>
+            <path d="M144 139 L176 139" stroke="#1c1a18" stroke-width="2" marker-end="url(#a6)"/>
+
+            <defs>
+              <marker id="a6" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <div class="legend">
+          Browser ist Plattform: Inputs/Outputs + Storage direkt im Client.
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Programmiersprachen & Werkzeuge</h3>
+        <h2>Typischer SPA-Stack</h2>
+        <ul>
+          <li><b>JavaScript</li>
+          <li><b>TypeScript:</b> Standard für professionelle SPAs (Typsicherheit).</li>
+          <li><b>Frameworks:</b> React, Vue, Angular, Svelte.</li>
+          <li><b>Build Tools:</b> Vite, Webpack (bündeln & optimieren).</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="SPA Stack: TS, Framework, Bundler, Deploy">
+            <rect width="320" height="220" rx="16" fill="#fefaf4"/>
+
+            <rect x="60" y="30" width="200" height="34" rx="12" fill="#f24b29"/>
+            <text x="118" y="52" font-size="10" font-family="sans-serif" fill="#fff">TypeScript / JavaScript</text>
+
+            <rect x="60" y="74" width="200" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="92" y="96" font-size="10" font-family="sans-serif" fill="#fff">Framework (React/Vue/...)</text>
+
+            <rect x="60" y="118" width="200" height="34" rx="12" fill="#f2c14e"/>
+            <text x="112" y="140" font-size="10" font-family="sans-serif">Bundler (Vite/Webpack)</text>
+
+            <rect x="60" y="162" width="200" height="34" rx="12" fill="#1c1a18"/>
+            <text x="110" y="184" font-size="10" font-family="sans-serif" fill="#fff">Deploy (Vercel/Netlify)</text>
+
+            <path d="M160 64 L160 74" stroke="#1c1a18" stroke-width="2" marker-end="url(#a7)"/>
+            <path d="M160 108 L160 118" stroke="#1c1a18" stroke-width="2" marker-end="url(#a7)"/>
+            <path d="M160 152 L160 162" stroke="#1c1a18" stroke-width="2" marker-end="url(#a7)"/>
+
+            <defs>
+              <marker id="a7" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="#1c1a18"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <div class="legend">
+          Toolchain: Code → Framework → Build → Deploy (CDN/Edge).
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Vorteile</h3>
+        <h2>Pro</h2>
+        <ul>
+          <li><b>UX:</b> Keine Wartezeiten beim Seitenwechsel, „Native App Feeling“.</li>
+          <li><b>Entkopplung:</b> Frontend und Backend sind komplett getrennt.</li>
+          <li><b>Caching:</b> Assets werden nur einmal geladen.</li>
+          <li><b>Deployment:</b> Einfaches Hosting statischer Dateien (Vercel/Netlify).</li>
+          <li><b>PWA:</b> Installierbar, Offline möglich.</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Vorteile: schnelle Navigation und Cache">
+            <rect width="320" height="220" rx="16" fill="#fefaf4"/>
+
+            <!-- speed gauge -->
+            <path d="M60 150 A100 100 0 0 1 260 150" fill="none" stroke="#1c1a18" stroke-width="8"/>
+            <line x1="160" y1="150" x2="230" y2="108" stroke="#f24b29" stroke-width="6"/>
+            <circle cx="160" cy="150" r="10" fill="#1b9aaa"/>
+            <text x="122" y="192" font-size="11" font-family="sans-serif">Fast Navigation</text>
+
+            <!-- cache block -->
+            <rect x="36" y="36" width="110" height="44" rx="12" fill="#f2c14e"/>
+            <text x="55" y="62" font-size="10" font-family="sans-serif">Cached Assets</text>
+
+            <rect x="174" y="36" width="110" height="44" rx="12" fill="#1b9aaa"/>
+            <text x="196" y="62" font-size="10" font-family="sans-serif" fill="#fff">PWA Ready</text>
+          </svg>
+        </div>
+
+        <div class="stat">
+          <span>Nach dem ersten Load</span>
+          <strong>Sehr schnell</strong>
+        </div>
+        <div class="stat">
+          <span>Offline möglich</span>
+          <strong>Mit PWA</strong>
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Nachteile</h3>
+        <h2>Contra</h2>
+        <ul>
+          <li><b>Initial Load:</b> Erster Aufruf kann dauern (JS-Bundle).</li>
+          <li><b>SEO:</b> Reine SPAs sind für Crawler oft schwerer als statisches HTML.</li>
+          <li><b>Komplexität:</b> State Management im Browser ist schwierig.</li>
+          <li><b>RAM/CPU:</b> Browser muss die Arbeit leisten (alt/low-end kritisch).</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="Nachteile: Initial Load, SEO, State, RAM">
+            <rect width="320" height="220" rx="16" fill="#fefaf4"/>
+
+            <!-- bundle bar -->
+            <text x="24" y="40" font-size="11" font-family="sans-serif">Initial Load (JS-Bundle)</text>
+            <rect x="24" y="50" width="272" height="18" rx="9" fill="#f2c14e"/>
+            <rect x="24" y="50" width="210" height="18" rx="9" fill="#f24b29"/>
+            <text x="246" y="64" font-size="9" font-family="sans-serif" fill="#1c1a18">groß</text>
+
+            <!-- seo block -->
+            <rect x="24" y="86" width="128" height="44" rx="12" fill="#1c1a18"/>
+            <text x="50" y="112" font-size="10" font-family="sans-serif" fill="#fff">SEO harder</text>
+
+            <!-- state block -->
+            <rect x="168" y="86" width="128" height="44" rx="12" fill="#1b9aaa"/>
+            <text x="186" y="112" font-size="10" font-family="sans-serif" fill="#fff">State Complexity</text>
+
+            <!-- ram block -->
+            <rect x="24" y="144" width="272" height="44" rx="12" fill="#f24b29"/>
+            <text x="34" y="170" font-size="10" font-family="sans-serif" fill="#fff">CPU/RAM im Browser (Low-End kritisch)</text>
+          </svg>
+        </div>
+
+        <div class="legend">
+          Gegenmaßnahmen: Code Splitting, SSR/SSG, Caching, Monitoring.
+        </div>
+      </div>
+    `,
+      },
+      {
+        content: `
+      <div>
+        <h3>Anwendungsbereiche</h3>
+        <h2>Wann passt SPA – wann nicht?</h2>
+        <ul>
+          <li><b>Ideal:</b> SaaS (Trello, Slack, Gmail), Dashboards, Admin-Panels, Social, Streaming.</li>
+          <li><b>Weniger geeignet:</b> Reine Content-Seiten (Blogs/News) → besser SSR/SSG.</li>
+        </ul>
+      </div>
+
+      <div class="visual">
+        <div class="svg-frame">
+          <svg viewBox="0 0 320 220" role="img" aria-label="SPA Fit Matrix">
+            <rect width="320" height="220" rx="16" fill="#fefaf4"/>
+
+            <text x="24" y="34" font-size="11" font-family="sans-serif">Fit</text>
+            <text x="70" y="34" font-size="11" font-family="sans-serif">Use Case</text>
+
+            <!-- good -->
+            <rect x="24" y="50" width="272" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="34" y="72" font-size="10" font-family="sans-serif" fill="#fff">✓ SaaS / Dashboards / Admin / Realtime</text>
+
+            <rect x="24" y="92" width="272" height="34" rx="12" fill="#1b9aaa"/>
+            <text x="34" y="114" font-size="10" font-family="sans-serif" fill="#fff">✓ Viele Views, viele Interaktionen</text>
+
+            <!-- mixed -->
+            <rect x="24" y="134" width="272" height="34" rx="12" fill="#f2c14e"/>
+            <text x="34" y="156" font-size="10" font-family="sans-serif">~ E-Commerce: oft Hybrid (SPA + SSR)</text>
+
+            <!-- bad -->
+            <rect x="24" y="176" width="272" height="34" rx="12" fill="#f24b29"/>
+            <text x="34" y="198" font-size="10" font-family="sans-serif" fill="#fff">✗ Content/SEO-first → lieber SSR/SSG</text>
+          </svg>
+        </div>
+
+        <div class="stat">
+          <span>Regel</span>
+          <strong>Interaktion hoch = SPA</strong>
+        </div>
+      </div>
+    `,
+      },
+
+      {
+        full: true,
+        content: `
+      <div>
+        <h3>Fragen?</h3>
+        <h2>Vielen Dank für die Aufmerksamkeit!</h2>
+        <p>
+          Optional: Link zum GitHub-Repo oder QR-Code zu einer Demo-App fügen wir ein.
+        </p>
+      </div>
+    `,
+      },
+    ];
+
+    const slidesRoot = document.getElementById("slides");
+    const progress = document.getElementById("progress");
+    const slideStatus = document.getElementById("slide-status");
+    let slides = [];
+    let index = 0;
+
+    const renderSlides = () => {
+      slidesRoot.innerHTML = "";
+      slidesData.forEach((slide, i) => {
+        const article = document.createElement("article");
+        article.className = "slide";
+        if (slide.full) article.classList.add("full");
+        article.innerHTML = slide.content.trim();
+        const heading =
+          article.querySelector("h1") ||
+          article.querySelector("h2") ||
+          article.querySelector("h3");
+        const label = heading ? heading.textContent.trim() : `Folie ${i + 1}`;
+        article.setAttribute("role", "group");
+        article.setAttribute("aria-roledescription", "Folie");
+        article.setAttribute("aria-label", `Folie ${i + 1}: ${label}`);
+        article.setAttribute("tabindex", "-1");
+        slidesRoot.appendChild(article);
+      });
+      slides = Array.from(document.querySelectorAll(".slide"));
+    };
+
+    const updateSlides = (nextIndex) => {
+      const nextSafe = (nextIndex + slides.length) % slides.length;
+      const current = slides[index];
+      const nextSlide = slides[nextSafe];
+
+      if (current === nextSlide) {
+        current.classList.add("active");
+        current.classList.remove("outgoing");
+      } else {
+        current.classList.remove("active");
+        current.classList.add("outgoing");
+        nextSlide.classList.remove("outgoing");
+        nextSlide.classList.add("active");
+      }
+
+      index = nextSafe;
+
+      slides.forEach((slide, i) => {
+        const isActive = i === index;
+        slide.setAttribute("aria-hidden", !isActive);
+        slide.setAttribute("tabindex", isActive ? "0" : "-1");
+      });
+
+      const percent = ((index + 1) / slides.length) * 100;
+      progress.style.width = `${percent}%`;
+
+      if (slideStatus) {
+        slideStatus.textContent = `Folie ${index + 1} von ${slides.length}`;
+      }
+    };
+
+    const handleKey = (event) => {
+      if (event.key === "ArrowRight" || event.key === " ") {
+        updateSlides(index + 1);
+      }
+      if (event.key === "ArrowLeft") {
+        updateSlides(index - 1);
+      }
+      if (event.key >= "1" && event.key <= "9") {
+        const jump = Number(event.key) - 1;
+        if (jump < slides.length) updateSlides(jump);
+      }
+    };
+
+    renderSlides();
+    updateSlides(0);
+    document.addEventListener("keydown", handleKey);
+  </script>
+</body>
+
 </html>
