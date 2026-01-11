@@ -320,6 +320,12 @@
         0 0 40px -30px var(--glow-2);
     }
 
+    .svg-frame svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     .legend {
       font-family: var(--mono);
       font-size: 0.85rem;
@@ -457,8 +463,34 @@
         gap: 6px;
       }
 
+      .slides {
+        height: min(640px, 76vh);
+      }
+
       .slide {
-        padding: 32px 28px;
+        padding: 26px 22px;
+        font-size: 1.12rem;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .slide h1 {
+        font-size: clamp(2rem, 8vw, 2.6rem);
+      }
+
+      .slide h2 {
+        font-size: clamp(1.6rem, 6.8vw, 2.2rem);
+      }
+
+      .slide h3 {
+        font-size: 0.85rem;
+        letter-spacing: 0.14em;
+        margin-bottom: 12px;
+      }
+
+      .slide p,
+      .slide li {
+        font-size: 1rem;
       }
 
       .agenda {
@@ -468,6 +500,50 @@
       footer {
         flex-direction: column;
         gap: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        padding-top: 18px;
+      }
+
+      .slides {
+        height: min(600px, 74vh);
+        border-radius: calc(var(--slide-radius) - 6px);
+      }
+
+      .slide {
+        padding: 22px 18px;
+        border-radius: calc(var(--slide-radius) - 10px);
+        font-size: 1.02rem;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .tag-row {
+        gap: 8px;
+      }
+
+      .tag {
+        font-size: 0.78rem;
+        padding: 6px 10px;
+      }
+
+      .stat {
+        padding: 14px 16px;
+      }
+
+      .stat strong {
+        font-size: 1.18rem;
+      }
+
+      .legend {
+        font-size: 0.78rem;
+      }
+
+      .progress {
+        width: 180px;
       }
     }
   </style>
