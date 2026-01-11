@@ -135,6 +135,7 @@
       height: min(720px, 80vh);
       position: relative;
       overflow: hidden;
+      touch-action: pan-y;
       border-radius: calc(var(--slide-radius) + 8px);
       border: 1px solid rgba(23, 26, 33, 0.08);
       box-shadow: 0 30px 90px -60px var(--shadow);
@@ -1017,6 +1018,10 @@
     const slideStatus = document.getElementById("slide-status");
     let slides = [];
     let index = 0;
+    let pointerId = null;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let skipClickUntil = 0;
 
     const renderSlides = () => {
       slidesRoot.innerHTML = "";
@@ -1083,9 +1088,55 @@
       }
     };
 
+    const isInteractive = (target) =>
+      target.closest("a, button, input, textarea, select, label");
+
+    const handleSlideClick = (event) => {
+      if (Date.now() < skipClickUntil) return;
+      if (isInteractive(event.target)) return;
+      const rect = slidesRoot.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      if (event.clientX < midpoint) {
+        updateSlides(index - 1);
+      } else {
+        updateSlides(index + 1);
+      }
+    };
+
+    const handlePointerDown = (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (isInteractive(event.target)) return;
+      pointerId = event.pointerId;
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+    };
+
+    const handlePointerUp = (event) => {
+      if (pointerId !== event.pointerId) return;
+      const deltaX = event.clientX - pointerStartX;
+      const deltaY = event.clientY - pointerStartY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      if (absX > 50 && absX > absY * 1.2) {
+        updateSlides(deltaX < 0 ? index + 1 : index - 1);
+        skipClickUntil = Date.now() + 500;
+      }
+      pointerId = null;
+    };
+
+    const handlePointerCancel = (event) => {
+      if (pointerId === event.pointerId) {
+        pointerId = null;
+      }
+    };
+
     renderSlides();
     updateSlides(0);
     document.addEventListener("keydown", handleKey);
+    slidesRoot.addEventListener("click", handleSlideClick);
+    slidesRoot.addEventListener("pointerdown", handlePointerDown);
+    slidesRoot.addEventListener("pointerup", handlePointerUp);
+    slidesRoot.addEventListener("pointercancel", handlePointerCancel);
   </script>
 </body>
 
